@@ -1,19 +1,25 @@
 import type { Repo } from "./types";
+import { PersistenceUnavailableError } from "./types";
+import { chooseRepo } from "./select";
 import { createMemoryRepo } from "./memory.server";
+import { connectMongo, createMongoRepo } from "./mongo.server";
 
-const g = globalThis as unknown as { __adventureRepo?: Repo };
+const g = globalThis as unknown as { __adventureRepo?: { key: string; repo: Repo } };
 
 export function isDemoMode(): boolean {
-  return !process.env["MONGODB_URI"] || process.env["DEMO_MODE"] === "true";
+  return chooseRepo(process.env).kind === "memory";
 }
 
+/**
+ * Returns MongoRepo whenever MONGODB_URI (+ MONGODB_DB_NAME) is configured and DEMO_MODE !== "true".
+ * Returns MemoryRepo ONLY when DEMO_MODE=true. Otherwise throws PersistenceUnavailableError (503).
+ */
 export function getRepo(): Repo {
-  if (!g.__adventureRepo) {
-    if (!isDemoMode()) {
-      // TODO(mongo): return createMongoRepo() — see ./mongo.server.ts
-      console.warn("[adventure] MONGODB_URI set but Mongo adapter not yet implemented; using demo store.");
-    }
-    g.__adventureRepo = createMemoryRepo();
-  }
-  return g.__adventureRepo;
+  const choice = chooseRepo(process.env);
+  if (choice.kind === "error") throw new PersistenceUnavailableError(choice.message);
+  const key = choice.kind === "mongodb" ? `mongo:${choice.dbName}` : "memory";
+  if (g.__adventureRepo?.key === key) return g.__adventureRepo.repo;
+  const repo = choice.kind === "mongodb" ? createMongoRepo(() => connectMongo(choice.uri, choice.dbName)) : createMemoryRepo();
+  g.__adventureRepo = { key, repo };
+  return repo;
 }

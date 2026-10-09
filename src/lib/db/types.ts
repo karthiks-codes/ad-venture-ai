@@ -18,6 +18,22 @@ export type Team = {
   submissionStatus: SubmissionStatus;
   toolkitViewedAt: string | null;
   challengeViewedAt: string | null;
+  isDemo?: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NewTeam = Pick<Team, "teamCode" | "teamName" | "member1Name" | "member2Name" | "email" | "passwordHash"> &
+  Partial<Pick<Team, "mustChangePassword" | "status" | "isDemo">>;
+
+export type Admin = {
+  id: string;
+  email: string;
+  googleSub: string | null;
+  name: string | null;
+  role: "owner" | "admin" | "viewer";
+  status: "active" | "disabled";
+  lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -58,14 +74,20 @@ export type AiDeclaration = {
 
 export type AuditLog = { id: string; at: string; actor: string; action: string; teamCode?: string; meta?: Record<string, unknown> };
 export type ResetToken = { tokenHash: string; teamId: string; expiresAt: string; usedAt: string | null };
+export type RepoHealth = { kind: "mongodb" | "memory"; status: "connected" | "error" | "demo"; latencyMs?: number; message?: string };
 
-/** Persistence contract. Implementations: memory (demo) and MongoDB (production). */
+/** Persistence contract. Implementations: MongoRepo (production) and MemoryRepo (explicit DEMO_MODE only). */
 export interface Repo {
+  readonly kind: "mongodb" | "memory";
+  health(): Promise<RepoHealth>;
+
   listTeams(): Promise<Team[]>;
   getTeam(id: string): Promise<Team | null>;
   findTeamByLogin(identifier: string): Promise<Team | null>;
+  /** Throws DuplicateError on teamCode/email collision. */
+  createTeam(t: NewTeam): Promise<Team>;
   updateTeam(id: string, patch: Partial<Team>): Promise<Team | null>;
-  /** Atomically assign only if team.problemId is null AND capacity allows. Returns updated team or null. */
+  /** Atomically assign only if team.problemId is null (unless force). Returns updated team or null. */
   assignProblemAtomic(teamId: string, choose: (counts: Record<string, number>) => string | null, by: "draw" | "admin", force?: boolean): Promise<Team | null>;
   assignmentCounts(): Promise<Record<string, number>>;
 
@@ -84,9 +106,22 @@ export interface Repo {
   getSettings(): Promise<Settings>;
   updateSettings(patch: Partial<Settings>): Promise<Settings>;
 
+  findAdmin(q: { email?: string; googleSub?: string }): Promise<Admin | null>;
+  listAdmins(): Promise<Admin[]>;
+  upsertAdmin(a: Pick<Admin, "email" | "role" | "status"> & Partial<Pick<Admin, "name" | "googleSub">>): Promise<Admin>;
+  recordAdminLogin(email: string, googleSub: string, name: string | null): Promise<Admin | null>;
+
   log(entry: Omit<AuditLog, "id" | "at">): Promise<void>;
   listLogs(limit: number): Promise<AuditLog[]>;
 
   saveResetToken(t: ResetToken): Promise<void>;
   consumeResetToken(tokenHash: string): Promise<ResetToken | null>;
+
+  /** Records one attempt and returns true if still within limit (shared across instances in Mongo). */
+  hitRateLimit(key: string, max: number, windowMs: number): Promise<boolean>;
+}
+
+export class DuplicateError extends Error {}
+export class PersistenceUnavailableError extends Error {
+  readonly status = 503;
 }
