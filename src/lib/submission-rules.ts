@@ -1,5 +1,5 @@
 // Pure, testable submission-state rules. The server is authoritative.
-export type SubmissionStatus = "none" | "uploading" | "submitted" | "reopened";
+export type SubmissionStatus = "none" | "uploading" | "submitted" | "failed" | "reopened";
 
 export type Settings = {
   eventStartAt: string;
@@ -24,13 +24,23 @@ export function canStartUpload(args: {
   const { settings, now, status, file } = args;
   if (!settings.eventActive) return { ok: false, reason: "The event is currently paused." };
   if (!settings.uploadEnabled) return { ok: false, reason: "Uploads are not open yet." };
-  if (now.getTime() > new Date(settings.submissionDeadline).getTime())
+  const startAt = Date.parse(settings.eventStartAt);
+  const deadline = Date.parse(settings.submissionDeadline);
+  if (!Number.isFinite(startAt) || !Number.isFinite(deadline) || deadline <= startAt) {
+    return { ok: false, reason: "The event upload window is not configured correctly." };
+  }
+  if (now.getTime() < startAt) return { ok: false, reason: "The event has not started yet." };
+  if (now.getTime() >= deadline)
     return { ok: false, reason: "The submission deadline has passed." };
-  if (status === "submitted") return { ok: false, reason: "Your team has already submitted its final video." };
+  if (status === "submitted")
+    return { ok: false, reason: "Your team has already submitted its final video." };
   if (!args.hasProblem) return { ok: false, reason: "Draw your problem statement first." };
   if (!args.hasDeclaration) return { ok: false, reason: "Complete the AI declaration first." };
   if (!settings.allowedVideoTypes.includes(file.type))
-    return { ok: false, reason: `File type not allowed. Use: ${settings.allowedVideoTypes.join(", ")}` };
+    return {
+      ok: false,
+      reason: `File type not allowed. Use: ${settings.allowedVideoTypes.join(", ")}`,
+    };
   if (file.size <= 0 || file.size > settings.maxVideoSizeBytes)
     return { ok: false, reason: `File must be under ${formatBytes(settings.maxVideoSizeBytes)}.` };
   return { ok: true };

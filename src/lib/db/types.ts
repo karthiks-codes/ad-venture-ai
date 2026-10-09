@@ -8,6 +8,7 @@ export type Team = {
   member2Name: string;
   email: string;
   passwordHash: string;
+  authVersion?: number;
   mustChangePassword: boolean;
   status: "active" | "inactive";
   firstLoginAt: string | null;
@@ -23,7 +24,10 @@ export type Team = {
   updatedAt: string;
 };
 
-export type NewTeam = Pick<Team, "teamCode" | "teamName" | "member1Name" | "member2Name" | "email" | "passwordHash"> &
+export type NewTeam = Pick<
+  Team,
+  "teamCode" | "teamName" | "member1Name" | "member2Name" | "email" | "passwordHash"
+> &
   Partial<Pick<Team, "mustChangePassword" | "status" | "isDemo">>;
 
 export type Admin = {
@@ -47,6 +51,7 @@ export type Submission = {
   driveFileSize: number | null;
   driveWebViewLink: string | null;
   mimeType: string | null;
+  uploadSessionUrlEncrypted: string | null;
   uploadStartedAt: string | null;
   uploadCompletedAt: string | null;
   attempts: number;
@@ -72,9 +77,26 @@ export type AiDeclaration = {
   createdAt: string;
 };
 
-export type AuditLog = { id: string; at: string; actor: string; action: string; teamCode?: string; meta?: Record<string, unknown> };
-export type ResetToken = { tokenHash: string; teamId: string; expiresAt: string; usedAt: string | null };
-export type RepoHealth = { kind: "mongodb" | "memory"; status: "connected" | "error" | "demo"; latencyMs?: number; message?: string };
+export type AuditLog = {
+  id: string;
+  at: string;
+  actor: string;
+  action: string;
+  teamCode?: string;
+  meta?: Record<string, unknown>;
+};
+export type ResetToken = {
+  tokenHash: string;
+  teamId: string;
+  expiresAt: string;
+  usedAt: string | null;
+};
+export type RepoHealth = {
+  kind: "mongodb" | "memory";
+  status: "connected" | "error" | "demo";
+  latencyMs?: number;
+  message?: string;
+};
 
 /** Persistence contract. Implementations: MongoRepo (production) and MemoryRepo (explicit DEMO_MODE only). */
 export interface Repo {
@@ -88,7 +110,12 @@ export interface Repo {
   createTeam(t: NewTeam): Promise<Team>;
   updateTeam(id: string, patch: Partial<Team>): Promise<Team | null>;
   /** Atomically assign only if team.problemId is null (unless force). Returns updated team or null. */
-  assignProblemAtomic(teamId: string, choose: (counts: Record<string, number>) => string | null, by: "draw" | "admin", force?: boolean): Promise<Team | null>;
+  assignProblemAtomic(
+    teamId: string,
+    choose: (counts: Record<string, number>) => string | null,
+    by: "draw" | "admin",
+    force?: boolean,
+  ): Promise<Team | null>;
   assignmentCounts(): Promise<Record<string, number>>;
 
   getSubmission(teamId: string): Promise<Submission | null>;
@@ -96,6 +123,8 @@ export interface Repo {
   /** Atomically move none/reopened → uploading. Returns null if already submitted. */
   beginSubmission(teamId: string, patch: Partial<Submission>): Promise<Submission | null>;
   updateSubmission(teamId: string, patch: Partial<Submission>): Promise<Submission | null>;
+  finalizeSubmission(teamId: string, patch: Partial<Submission>): Promise<Submission | null>;
+  reopenSubmission(teamId: string): Promise<Submission | null>;
 
   listTools(includeDisabled?: boolean): Promise<AiTool[]>;
   upsertTool(tool: AiTool): Promise<AiTool>;
@@ -108,7 +137,9 @@ export interface Repo {
 
   findAdmin(q: { email?: string; googleSub?: string }): Promise<Admin | null>;
   listAdmins(): Promise<Admin[]>;
-  upsertAdmin(a: Pick<Admin, "email" | "role" | "status"> & Partial<Pick<Admin, "name" | "googleSub">>): Promise<Admin>;
+  upsertAdmin(
+    a: Pick<Admin, "email" | "role" | "status"> & Partial<Pick<Admin, "name" | "googleSub">>,
+  ): Promise<Admin>;
   recordAdminLogin(email: string, googleSub: string, name: string | null): Promise<Admin | null>;
 
   log(entry: Omit<AuditLog, "id" | "at">): Promise<void>;
@@ -116,6 +147,7 @@ export interface Repo {
 
   saveResetToken(t: ResetToken): Promise<void>;
   consumeResetToken(tokenHash: string): Promise<ResetToken | null>;
+  revokeResetTokens(teamId: string): Promise<void>;
 
   /** Records one attempt and returns true if still within limit (shared across instances in Mongo). */
   hitRateLimit(key: string, max: number, windowMs: number): Promise<boolean>;

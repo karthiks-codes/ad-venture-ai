@@ -13,11 +13,31 @@ export const EVENT = {
 } as const;
 
 export const CRITERIA = [
-  { key: "creativity", title: "Creativity & Originality", desc: "A fresh, unexpected idea that only your team could have made." },
-  { key: "story", title: "Storytelling", desc: "A clear arc — hook, tension, payoff — in seconds." },
-  { key: "persuasion", title: "Persuasiveness", desc: "Would the audience actually want the product?" },
-  { key: "production", title: "Video Production Quality", desc: "Visual polish, pacing, sound and edit craft." },
-  { key: "impact", title: "Overall Impact", desc: "The lasting impression your ad leaves on the jury." },
+  {
+    key: "creativity",
+    title: "Creativity & Originality",
+    desc: "A fresh, unexpected idea that only your team could have made.",
+  },
+  {
+    key: "story",
+    title: "Storytelling",
+    desc: "A clear arc — hook, tension, payoff — in seconds.",
+  },
+  {
+    key: "persuasion",
+    title: "Persuasiveness",
+    desc: "Would the audience actually want the product?",
+  },
+  {
+    key: "production",
+    title: "Video Production Quality",
+    desc: "Visual polish, pacing, sound and edit craft.",
+  },
+  {
+    key: "impact",
+    title: "Overall Impact",
+    desc: "The lasting impression your ad leaves on the jury.",
+  },
 ] as const;
 
 export const STEPS = [

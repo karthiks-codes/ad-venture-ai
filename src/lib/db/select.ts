@@ -12,7 +12,11 @@ export function chooseRepo(env: Record<string, string | undefined>): RepoChoice 
       return { kind: "error", message: "DEMO_MODE=true is not allowed in production." };
     return { kind: "memory" };
   }
-  if (!uri) return { kind: "error", message: "MONGODB_URI is not configured. Set it, or set DEMO_MODE=true for local demo." };
+  if (!uri)
+    return {
+      kind: "error",
+      message: "MONGODB_URI is not configured. Set it, or set DEMO_MODE=true for local demo.",
+    };
   const dbName = env["MONGODB_DB_NAME"]?.trim();
   if (!dbName) return { kind: "error", message: "MONGODB_DB_NAME is not configured." };
   return { kind: "mongodb", uri, dbName };

@@ -9,7 +9,10 @@ export function settingsFromEnv(env: Record<string, string | undefined>): Settin
     submissionDeadline: new Date(deadline).toISOString(),
     timezone: env["EVENT_TIMEZONE"] || "Asia/Kolkata",
     maxVideoSizeBytes: Number(env["MAX_VIDEO_SIZE_BYTES"]) || 1.5 * 1024 ** 3,
-    allowedVideoTypes: (env["ALLOWED_VIDEO_TYPES"] || "video/mp4,video/quicktime").split(",").map((s) => s.trim()).filter(Boolean),
+    allowedVideoTypes: (env["ALLOWED_VIDEO_TYPES"] || "video/mp4,video/quicktime")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
     uploadEnabled: false,
     eventActive: true,
   };

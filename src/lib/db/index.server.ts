@@ -1,3 +1,4 @@
+import "server-only";
 import type { Repo } from "./types";
 import { PersistenceUnavailableError } from "./types";
 import { chooseRepo } from "./select";
@@ -19,7 +20,10 @@ export function getRepo(): Repo {
   if (choice.kind === "error") throw new PersistenceUnavailableError(choice.message);
   const key = choice.kind === "mongodb" ? `mongo:${choice.dbName}` : "memory";
   if (g.__adventureRepo?.key === key) return g.__adventureRepo.repo;
-  const repo = choice.kind === "mongodb" ? createMongoRepo(() => connectMongo(choice.uri, choice.dbName)) : createMemoryRepo();
+  const repo =
+    choice.kind === "mongodb"
+      ? createMongoRepo(() => connectMongo(choice.uri, choice.dbName))
+      : createMemoryRepo();
   g.__adventureRepo = { key, repo };
   return repo;
 }

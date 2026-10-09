@@ -45,8 +45,23 @@ const base = {
 
 describe("canStartUpload", () => {
   it("allows a valid upload", () => expect(canStartUpload(base).ok).toBe(true));
-  it("blocks after deadline", () => expect(canStartUpload({ ...base, now: new Date("2026-10-13T11:00:00Z") }).ok).toBe(false));
-  it("blocks second submission", () => expect(canStartUpload({ ...base, status: "submitted" }).ok).toBe(false));
-  it("blocks oversize", () => expect(canStartUpload({ ...base, file: { ...base.file, size: 2 * 1024 ** 3 } }).ok).toBe(false));
-  it("blocks wrong type", () => expect(canStartUpload({ ...base, file: { ...base.file, type: "video/webm" } }).ok).toBe(false));
+  it("blocks after deadline", () =>
+    expect(canStartUpload({ ...base, now: new Date("2026-10-13T11:00:00Z") }).ok).toBe(false));
+  it("blocks before event start", () =>
+    expect(canStartUpload({ ...base, now: new Date("2026-10-13T07:59:59Z") }).ok).toBe(false));
+  it("blocks an invalid event window", () =>
+    expect(
+      canStartUpload({
+        ...base,
+        settings: { ...settings, eventStartAt: "not-a-date" },
+      }).ok,
+    ).toBe(false));
+  it("blocks second submission", () =>
+    expect(canStartUpload({ ...base, status: "submitted" }).ok).toBe(false));
+  it("blocks oversize", () =>
+    expect(canStartUpload({ ...base, file: { ...base.file, size: 2 * 1024 ** 3 } }).ok).toBe(
+      false,
+    ));
+  it("blocks wrong type", () =>
+    expect(canStartUpload({ ...base, file: { ...base.file, type: "video/webm" } }).ok).toBe(false));
 });
