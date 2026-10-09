@@ -3,6 +3,7 @@ import { PROBLEMS } from "@/config/problems";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { AdminShell } from "./_components/admin-shell";
+import { AuditEvents } from "./audit-events";
 
 export const runtime = "nodejs";
 
@@ -68,22 +69,7 @@ export default async function AdminOverviewPage() {
       </div>
       <section className="panel mt-7 p-6">
         <h2 className="text-xl font-bold">Recent audit events</h2>
-        {logs.length ? (
-          <ul className="mt-4 divide-y divide-border">
-            {logs.map((entry) => (
-              <li className="flex flex-wrap justify-between gap-2 py-3 text-sm" key={entry.id}>
-                <span>
-                  {entry.action} <span className="text-muted-foreground">· {entry.actor}</span>
-                </span>
-                <time className="text-muted-foreground" dateTime={entry.at}>
-                  {entry.at}
-                </time>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">No audit events yet.</p>
-        )}
+        <AuditEvents initialLogs={logs} />
       </section>
     </AdminShell>
   );

@@ -10,7 +10,7 @@ This repository is a Next.js App Router application. MongoDB Atlas is the produc
 - Team login by normalized team code or email, bcrypt password hashes, signed HTTP-only cookies, shared MongoDB-backed login/reset rate limits, forced first-login password changes, logout, and single-use password reset links.
 - Team dashboard, static challenge configuration, concurrent-allocation protection, dynamic MongoDB-backed AI tools, AI declaration, and submission status workflow.
 - Administrator Google OAuth with PKCE, state/nonce validation, signature-verified Google ID tokens, and an active MongoDB administrator allowlist. Google login does not create or promote admins.
-- Admin overview, individual and CSV team creation/status/credential actions, audited assignment/reassignment, static problem counts, submissions, editable AI-tool configuration and MongoDB-backed event settings.
+- Admin overview with audit events refreshed every five seconds without a page reload, individual and CSV team creation/status/credential actions, audited assignment/reassignment, static problem counts, submissions, editable AI-tool configuration and MongoDB-backed event settings.
 - MongoDB unique/query indexes and transaction-serialized allocation. Submission reservation and finalization use a unique per-team document and conditional database state transitions.
 - Google Drive resumable upload session service and a browser chunk uploader. Vercel/Next.js handles metadata and authorization only; video bytes never pass through the application server.
 - Gmail API templates for credentials, password reset and submission confirmation. The provider reports success only after Gmail accepts the send request.
