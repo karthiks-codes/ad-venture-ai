@@ -1,9 +1,10 @@
 import "server-only";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
+import { OAuth2Client } from "google-auth-library";
 
 /*
  * Google Drive storage service — isolated provider module.
- * Uses a service account (JWT bearer) with access to a Shared Drive.
+ * Uses an organizer-authorized OAuth refresh token with access to the event folder.
  * The server ONLY creates folders and resumable upload sessions; the browser
  * PUTs the video bytes directly to the returned session URL. No video bytes
  * ever pass through this app server.
@@ -41,52 +42,36 @@ export function decryptUploadSession(encrypted: string): string {
 
 export function driveConfigured(): boolean {
   return Boolean(
-    process.env["GOOGLE_DRIVE_CLIENT_EMAIL"] &&
-    process.env["GOOGLE_DRIVE_PRIVATE_KEY"] &&
+    process.env["GOOGLE_DRIVE_OAUTH_CLIENT_ID"] &&
+    process.env["GOOGLE_DRIVE_OAUTH_CLIENT_SECRET"] &&
+    process.env["GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN"] &&
     process.env["GOOGLE_DRIVE_ROOT_FOLDER_ID"],
   );
 }
 
-const b64url = (s: string | ArrayBuffer) => {
-  const str = typeof s === "string" ? s : String.fromCharCode(...new Uint8Array(s));
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-};
-
-let cached: { token: string; exp: number } | null = null;
+let cachedOAuth: { configKey: string; client: OAuth2Client } | null = null;
 
 async function accessToken(): Promise<string> {
-  if (cached && cached.exp > Date.now() + 60_000) return cached.token;
-  const email = process.env["GOOGLE_DRIVE_CLIENT_EMAIL"]!;
-  const pem = process.env["GOOGLE_DRIVE_PRIVATE_KEY"]!.replace(/\\n/g, "\n");
-  const der = Uint8Array.from(atob(pem.replace(/-----[^-]+-----/g, "").replace(/\s/g, "")), (c) =>
-    c.charCodeAt(0),
-  );
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    der,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const iat = Math.floor(Date.now() / 1000);
-  const unsigned = `${b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }))}.${b64url(JSON.stringify({ iss: email, scope: SCOPE, aud: "https://oauth2.googleapis.com/token", iat, exp: iat + 3600 }))}`;
-  const sig = await crypto.subtle.sign(
-    "RSASSA-PKCS1-v1_5",
-    key,
-    new TextEncoder().encode(unsigned),
-  );
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: `${unsigned}.${b64url(sig)}`,
-    }),
-  });
-  if (!res.ok) throw new Error(`Drive auth failed [${res.status}]`);
-  const j = (await res.json()) as { access_token: string; expires_in: number };
-  cached = { token: j.access_token, exp: Date.now() + j.expires_in * 1000 };
-  return j.access_token;
+  const clientId = process.env["GOOGLE_DRIVE_OAUTH_CLIENT_ID"];
+  const clientSecret = process.env["GOOGLE_DRIVE_OAUTH_CLIENT_SECRET"];
+  const refreshToken = process.env["GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN"];
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error(
+      "Google Drive OAuth is not configured. Set GOOGLE_DRIVE_OAUTH_CLIENT_ID, GOOGLE_DRIVE_OAUTH_CLIENT_SECRET, and GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN.",
+    );
+  }
+
+  const configKey = createHash("sha256")
+    .update(`${clientId}\0${clientSecret}\0${refreshToken}`)
+    .digest("hex");
+  if (!cachedOAuth || cachedOAuth.configKey !== configKey) {
+    const client = new OAuth2Client(clientId, clientSecret);
+    client.setCredentials({ refresh_token: refreshToken });
+    cachedOAuth = { configKey, client };
+  }
+  const credentials = await cachedOAuth.client.getAccessToken();
+  if (!credentials.token) throw new Error("Google did not issue a Drive API access token.");
+  return credentials.token;
 }
 
 async function api(path: string, init: RequestInit = {}) {

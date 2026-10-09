@@ -13,9 +13,9 @@ This repository is a Next.js App Router application. MongoDB Atlas is the produc
 - Admin overview, individual and CSV team creation/status/credential actions, audited assignment/reassignment, static problem counts, submissions, editable AI-tool configuration and MongoDB-backed event settings.
 - MongoDB unique/query indexes and transaction-serialized allocation. Submission reservation and finalization use a unique per-team document and conditional database state transitions.
 - Google Drive resumable upload session service and a browser chunk uploader. Vercel/Next.js handles metadata and authorization only; video bytes never pass through the application server.
-- Resend templates for credentials, password reset and submission confirmation. The provider does not report delivery unless Resend confirms acceptance.
+- Gmail API templates for credentials, password reset and submission confirmation. The provider reports success only after Gmail accepts the send request.
 
-Live MongoDB, Google OAuth, Drive and Resend credentials are not included in this repository. Their real external connections and a production upload have not been verified here. The remaining setup/verification steps are listed below.
+Live MongoDB, Google OAuth, Gmail API, and Drive credentials are not included in this repository. Their real external connections and a production upload have not been verified here. The remaining setup/verification steps are listed below.
 
 ## Requirements and local development
 
@@ -79,25 +79,25 @@ Google OAuth is enabled only for a verified Google identity matching an active d
 
 The bootstrap command requires `MONGODB_URI` and `MONGODB_DB_NAME`; it never uses demo memory.
 
-## Resend email
+## Gmail API email
 
-Create a Resend account/domain and verify the sender domain. Configure `RESEND_API_KEY` and `EMAIL_FROM` (for example `ADventure 2026 <events@your-verified-domain>`). `NEXT_PUBLIC_APP_URL` must be the public application origin so links are generated correctly.
+Email sends through the Gmail API as one organizer-controlled Gmail or Google Workspace mailbox. Create/select a Google Cloud project, enable the Gmail API, and configure an OAuth consent screen. Create OAuth credentials, then grant offline access with the `https://www.googleapis.com/auth/gmail.send` scope for the mailbox that will send event email. Store the resulting client ID, client secret and refresh token as `GMAIL_OAUTH_CLIENT_ID`, `GMAIL_OAUTH_CLIENT_SECRET` and `GMAIL_OAUTH_REFRESH_TOKEN`; set `GMAIL_SENDER_EMAIL` to that same authorized mailbox. Keep the refresh token server-only and out of source control. For OAuth consent screens in Testing status, Google may expire refresh tokens after seven days; publish/approve the consent configuration or plan to rotate the token before the event.
 
-Team creation/credential reset, password recovery and submission confirmation use the server-only provider. No local console provider prints passwords or reset tokens. To verify delivery, create a test team using an inbox you control, check the Resend event log, and verify the corresponding account state in MongoDB. Provider failures are reported as failures; they do not mark mail as delivered.
+`NEXT_PUBLIC_APP_URL` must be the public application origin so credential and reset links are correct. Team creation/credential reset, password recovery and submission confirmation use this Gmail provider. The API acceptance response is not proof of inbox delivery; verify a real test message in the sender's Sent folder and the recipient inbox. Gmail has sending quotas and anti-abuse policies; confirm the mailbox can send the expected event volume (including resets and retries) before importing all teams. If Gmail throttles sends, the operation reports an error and does not claim email acceptance.
 
-The admin Teams page accepts CSV imports with `teamCode,teamName,member1Name,member2Name,email` headers (headers are case-insensitive and may be in any order). Quoted commas and escaped quotes are supported. Each import is limited to 200 rows and 200 KB; existing team codes/emails are reported per row. Accounts activate only after their credential email is accepted by Resend, so configure and test email before importing event teams.
+The admin Teams page accepts CSV imports with `teamCode,teamName,member1Name,member2Name,email` headers (headers are case-insensitive and may be in any order). Quoted commas and escaped quotes are supported. Each import is limited to 200 rows and 200 KB; existing team codes/emails are reported per row. Accounts activate only after Gmail accepts their credential email, so configure and test email before importing event teams.
 
 ## Google Drive resumable uploads
 
 1. Enable the Google Drive API in the organizer's Google Cloud project.
-2. Create a service account and grant it access to the organizer-controlled Drive folder. A Shared Drive is recommended for event ownership and continuity.
+2. Authorize a dedicated organizer Google account with an OAuth client and the `https://www.googleapis.com/auth/drive` scope. Configure `GOOGLE_DRIVE_OAUTH_CLIENT_ID`, `GOOGLE_DRIVE_OAUTH_CLIENT_SECRET`, and `GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN`. The OAuth account must have permission to create files in the event folder; this avoids requiring a service-account key.
 3. Create the root `ADventure 2026` folder and set its ID as `GOOGLE_DRIVE_ROOT_FOLDER_ID`. The application creates `Submissions/<TEAMCODE - Team Name>/` beneath it.
-4. Configure `GOOGLE_DRIVE_CLIENT_EMAIL`, `GOOGLE_DRIVE_PRIVATE_KEY` (PEM; escaped newlines are accepted), and, where applicable, `GOOGLE_DRIVE_SHARED_DRIVE_ID`.
+4. If using a Shared Drive, set `GOOGLE_DRIVE_SHARED_DRIVE_ID` and grant the authorized organizer account access to that Shared Drive.
 5. Configure `NEXT_PUBLIC_APP_URL` to the exact browser origin used for the upload session.
 6. Enable uploads and configure the deadline, MIME types and size limit in `/admin/settings`.
 7. Test with a small MP4 first, then verify the file's parent folder, exact size/MIME type, final submission record, and Drive link. Test interruption/resume and deadline rejection before the event.
 
-The browser uploads 8 MiB chunks directly to the Google Drive resumable session and reports progress. The app server never accepts or proxies video bytes. The service account, OAuth tokens and private key are server-only. A live Drive session, Google CORS behavior on the event domain, and large-file resume/finalization remain unverified until real organizer credentials are configured.
+The browser uploads 8 MiB chunks directly to the Google Drive resumable session and reports progress. The app server never accepts or proxies video bytes. OAuth client credentials and refresh tokens are server-only. A live Drive session, Google CORS behavior on the event domain, and large-file resume/finalization remain unverified until real organizer credentials are configured.
 
 ## Environment variables
 
@@ -107,8 +107,8 @@ The browser uploads 8 MiB chunks directly to the Google Drive resumable session 
 - `AUTH_SECRET` (at least 32 characters)
 - `NEXT_PUBLIC_APP_URL`
 - Google OAuth client ID/secret/callback URI
-- `RESEND_API_KEY`, `EMAIL_FROM`
-- Google Drive service-account email/private key and root folder ID
+- `GMAIL_OAUTH_CLIENT_ID`, `GMAIL_OAUTH_CLIENT_SECRET`, `GMAIL_OAUTH_REFRESH_TOKEN`, `GMAIL_SENDER_EMAIL`
+- Google Drive OAuth client ID/secret/refresh token and root folder ID
 - Event start/deadline/timezone/upload settings
 
 Private keys and API secrets must not use a `NEXT_PUBLIC_` prefix.
@@ -128,11 +128,11 @@ Credential-independent unit tests cover repository selection/no production memor
 
 ## Vercel deployment
 
-1. Import the repository into Vercel; the framework is Next.js and build command is `npm run build`.
+1. Import the repository into Vercel. Set **Framework Preset** to **Next.js**, **Root Directory** to the repository root, and **Build Command** to `npm run build` (or leave Vercel's Next.js default). Do not set the Output Directory to `dist`; clear/disable any Output Directory override so Vercel uses Next.js output automatically.
 2. Add production environment variables in the Vercel project settings. Set `DEMO_MODE=false`.
 3. Ensure the Atlas user is least-privileged and Atlas network access permits the deployment.
 4. Register the Google OAuth callback URL for the production domain and bootstrap the first admin against the intended Atlas database.
-5. Configure the Resend sender and Drive service-account access to the organizer-controlled folder.
+5. Configure Gmail API sending for the organizer mailbox and Drive OAuth access to the organizer-controlled folder.
 6. Deploy and verify `/`, `/login`, `/admin`, team login, settings, reset email and a small direct-to-Drive upload.
 
 MongoDB transactions require an Atlas replica set, as provided by Atlas clusters. Never run the seed command against production unless intentionally authorized and explicitly enabled.

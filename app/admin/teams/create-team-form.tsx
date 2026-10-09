@@ -40,7 +40,7 @@ export function CreateTeamForm({ readOnly }: { readOnly: boolean }) {
       }
       setMessage(
         result.emailSent
-          ? `Team ${result.teamCode} was created and its credential email was accepted by Resend.`
+          ? `Team ${result.teamCode} was created and Gmail accepted its credential email.`
           : `Team ${result.teamCode} was created but remains inactive because its credential email was not delivered.`,
       );
       form.reset();

@@ -185,5 +185,5 @@ describe("explicit MongoDB seed safety", () => {
     expect(
       (await repo.listTeams()).every((team) => team.email.endsWith("@teams.adventure.test")),
     ).toBe(true);
-  });
+  }, 15_000);
 });

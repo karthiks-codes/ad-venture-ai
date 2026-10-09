@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         status: "created",
         message: [
           active
-            ? "Created and activated; credential email accepted by Resend."
+            ? "Created and activated; Gmail accepted credential email."
             : emailSent
               ? "Credential email was accepted, but activation failed; verify account status before retrying."
               : "Created but remains inactive because credential email was not sent.",

@@ -1,36 +1,105 @@
 import "server-only";
-// Email provider abstraction. Default: Resend (HTTP API). Swap in SMTP by adding a provider.
+import { OAuth2Client } from "google-auth-library";
+import { randomUUID } from "node:crypto";
 import { EVENT } from "@/config/event";
 
-type Mail = { to: string; subject: string; html: string; text: string };
+export type Mail = { to: string; subject: string; html: string; text: string };
 interface EmailProvider {
   name: string;
-  send(m: Mail): Promise<{ ok: boolean; id?: string; error?: string }>;
+  send(message: Mail): Promise<{ ok: boolean; id?: string; error?: string }>;
 }
 
-const resend: EmailProvider = {
-  name: "resend",
-  async send(m) {
-    const apiKey = process.env["RESEND_API_KEY"];
-    const from = process.env["EMAIL_FROM"];
-    if (!apiKey || !from) throw new Error("Resend requires RESEND_API_KEY and EMAIL_FROM.");
-    const res = await fetch("https://api.resend.com/emails", {
+function requiredEmailConfig() {
+  const clientId = process.env["GMAIL_OAUTH_CLIENT_ID"];
+  const clientSecret = process.env["GMAIL_OAUTH_CLIENT_SECRET"];
+  const refreshToken = process.env["GMAIL_OAUTH_REFRESH_TOKEN"];
+  const from = process.env["GMAIL_SENDER_EMAIL"]?.trim();
+  if (!clientId || !clientSecret || !refreshToken || !from) {
+    throw new Error(
+      "Gmail email is not configured. Set GMAIL_OAUTH_CLIENT_ID, GMAIL_OAUTH_CLIENT_SECRET, GMAIL_OAUTH_REFRESH_TOKEN, and GMAIL_SENDER_EMAIL.",
+    );
+  }
+  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(from)) {
+    throw new Error("GMAIL_SENDER_EMAIL must be a valid Gmail or Google Workspace mailbox.");
+  }
+  return { clientId, clientSecret, refreshToken, from };
+}
+
+function encodeHeader(value: string): string {
+  const safe = value.replace(/[\r\n]+/g, " ").trim();
+  return `=?UTF-8?B?${Buffer.from(safe, "utf8").toString("base64")}?=`;
+}
+
+export function createGmailRawMessage(
+  message: Mail,
+  from: string,
+  boundary = `adv-${randomUUID()}`,
+): string {
+  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(from)) {
+    throw new Error("Sender email address is invalid.");
+  }
+  const safeTo = message.to.replace(/[\r\n]+/g, "").trim();
+  if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(safeTo)) {
+    throw new Error("Recipient email address is invalid.");
+  }
+  const content = [
+    `From: ADventure 2026 <${from}>`,
+    `To: ${safeTo}`,
+    `Subject: ${encodeHeader(message.subject)}`,
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    "",
+    `--${boundary}`,
+    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Transfer-Encoding: base64",
+    "",
+    Buffer.from(message.text, "utf8").toString("base64"),
+    `--${boundary}`,
+    "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: base64",
+    "",
+    Buffer.from(message.html, "utf8").toString("base64"),
+    `--${boundary}--`,
+    "",
+  ].join("\r\n");
+  return Buffer.from(content, "utf8").toString("base64url");
+}
+
+const gmail: EmailProvider = {
+  name: "gmail",
+  async send(message) {
+    const { clientId, clientSecret, refreshToken, from } = requiredEmailConfig();
+    const oauth = new OAuth2Client(clientId, clientSecret);
+    oauth.setCredentials({ refresh_token: refreshToken });
+    const accessToken = await oauth.getAccessToken();
+    if (!accessToken.token) throw new Error("Google did not issue a Gmail API access token.");
+
+    const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from, to: m.to, subject: m.subject, html: m.html, text: m.text }),
+      headers: {
+        Authorization: `Bearer ${accessToken.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ raw: createGmailRawMessage(message, from) }),
     });
-    if (!res.ok) throw new Error(`Resend rejected the email [${res.status}].`);
-    return { ok: true, id: ((await res.json()) as { id: string }).id };
+    if (!response.ok) throw new Error(`Gmail API rejected the email [${response.status}].`);
+    const result: unknown = await response.json();
+    if (
+      typeof result !== "object" ||
+      result === null ||
+      !("id" in result) ||
+      typeof result.id !== "string" ||
+      result.id.length === 0
+    ) {
+      throw new Error("Gmail API did not confirm the email request.");
+    }
+    return { ok: true, id: result.id };
   },
 };
 
 function provider(): EmailProvider {
-  if (!process.env["RESEND_API_KEY"] || !process.env["EMAIL_FROM"]) {
-    throw new Error(
-      "Email is not configured. Set RESEND_API_KEY and EMAIL_FROM before sending mail.",
-    );
-  }
-  return resend;
+  requiredEmailConfig();
+  return gmail;
 }
 
 const escapeHtml = (value: string) =>
@@ -98,8 +167,8 @@ export const templates = {
 };
 
 export async function sendEmail(to: string, mail: Omit<Mail, "to">) {
-  const p = provider();
-  const result = await p.send({ ...mail, to });
-  if (!result.ok) throw new Error(`${p.name} did not confirm delivery.`);
-  return { ...result, provider: p.name };
+  const mailProvider = provider();
+  const result = await mailProvider.send({ ...mail, to });
+  if (!result.ok) throw new Error(`${mailProvider.name} did not confirm the email request.`);
+  return { ...result, provider: mailProvider.name };
 }
