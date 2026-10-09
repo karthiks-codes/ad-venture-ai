@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
   const redirectUri = process.env["GOOGLE_OAUTH_REDIRECT_URI"];
   if (!clientId || !clientSecret || !redirectUri) return fail(request, "oauth-unconfigured");
 
+  let phase = "Google token exchange";
   try {
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
     const tokenData = (await tokenResponse.json()) as { id_token?: string };
     if (!tokenData.id_token) return fail(request, "oauth-token");
 
+    phase = "Google identity verification";
     const ticket = await new OAuth2Client(clientId).verifyIdToken({
       idToken: tokenData.id_token,
       audience: clientId,
@@ -68,19 +70,29 @@ export async function GET(request: NextRequest) {
     }
 
     const email = identity.email.trim().toLowerCase();
+    phase = "MongoDB admin lookup";
     const repo = getRepo();
     const admin = await repo.findAdmin({ email });
     if (!admin || admin.status !== "active") return fail(request, "not-authorized");
 
+    phase = "MongoDB admin login update";
     const updated = await repo.recordAdminLogin(email, identity.sub, identity.name ?? null);
     if (!updated) return fail(request, "not-authorized");
+    phase = "MongoDB audit log";
     await repo.log({ actor: `admin:${email}`, action: "admin.login" });
+    phase = "Session creation";
     await setSession({ role: "admin", email, googleSub: identity.sub });
     const response = NextResponse.redirect(new URL("/admin", request.url));
     for (const name of cookieNames) response.cookies.delete(name);
     return response;
   } catch (error) {
-    console.error("[admin-oauth] Sign-in failed", error instanceof Error ? error.name : "unknown");
+    console.error(
+      "[admin-oauth] Sign-in failed",
+      JSON.stringify({
+        phase,
+        errorName: error instanceof Error ? error.name : "unknown",
+      }),
+    );
     return fail(request, "oauth-unavailable");
   }
 }
