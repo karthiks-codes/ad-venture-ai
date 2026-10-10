@@ -1,10 +1,10 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { DuplicateError } from "@/lib/db/types";
 import { sendEmail, templates } from "@/lib/email.server";
+import { hashPassword } from "@/lib/password.server";
 import { randomToken } from "@/lib/session.server";
 import { parseTeamCsv } from "@/lib/team-import";
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
         ...parsed.data,
         teamCode,
         email: parsed.data.email.toLowerCase(),
-        passwordHash: await bcrypt.hash(temporaryPassword, 12),
+        passwordHash: await hashPassword(temporaryPassword),
         mustChangePassword: true,
         status: "inactive",
       });

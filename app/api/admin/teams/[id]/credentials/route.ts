@@ -1,8 +1,8 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { sendEmail, templates } from "@/lib/email.server";
+import { hashPassword } from "@/lib/password.server";
 import { randomToken } from "@/lib/session.server";
 
 export const runtime = "nodejs";
@@ -28,7 +28,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       );
 
     await repo.updateTeam(team.id, {
-      passwordHash: await bcrypt.hash(temporaryPassword, 12),
+      passwordHash: await hashPassword(temporaryPassword),
       mustChangePassword: true,
       authVersion: (team.authVersion ?? 0) + 1,
     });

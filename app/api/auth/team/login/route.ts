@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { getRepo } from "@/lib/db/index.server";
+import { verifyPassword } from "@/lib/password.server";
 import { setSession, sha256 } from "@/lib/session.server";
 
 export const runtime = "nodejs";
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const valid =
       team &&
       team.status === "active" &&
-      (await bcrypt.compare(parsed.data.password, team.passwordHash));
+      (await verifyPassword(parsed.data.password, team.passwordHash));
     if (!valid || !team) {
       return NextResponse.json(
         { error: "Team code/email or password is incorrect." },

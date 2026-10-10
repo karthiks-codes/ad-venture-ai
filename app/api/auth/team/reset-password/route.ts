@@ -1,7 +1,7 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getRepo } from "@/lib/db/index.server";
+import { hashPassword } from "@/lib/password.server";
 import { sha256 } from "@/lib/session.server";
 
 export const runtime = "nodejs";
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
+    const passwordHash = await hashPassword(parsed.data.newPassword);
     const updated = await repo.updateTeam(team.id, {
       passwordHash,
       mustChangePassword: false,

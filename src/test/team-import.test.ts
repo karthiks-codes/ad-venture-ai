@@ -10,10 +10,10 @@ describe("team CSV import parser", () => {
       {
         rowNumber: 2,
         values: {
-          teamcode: "ADV-001",
-          teamname: "Team, Alpha",
-          member1name: "Member One",
-          member2name: "Member Two",
+          teamCode: "ADV-001",
+          teamName: "Team, Alpha",
+          member1Name: "Member One",
+          member2Name: "Member Two",
           email: "team@example.test",
         },
       },
@@ -24,7 +24,7 @@ describe("team CSV import parser", () => {
     const rows = parseTeamCsv(
       'teamCode,teamName,member1Name,member2Name,email\nADV-001,"The ""A"" Team",One,Two,team@example.test\n\n',
     );
-    expect(rows[0]?.values["teamname"]).toBe('The "A" Team');
+    expect(rows[0]?.values["teamName"]).toBe('The "A" Team');
   });
 
   it("rejects missing headers, malformed quotes, and excessive row counts", () => {

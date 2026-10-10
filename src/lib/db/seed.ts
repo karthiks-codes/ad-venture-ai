@@ -1,8 +1,8 @@
 import "server-only";
 // Explicit, idempotent seeding. Only ever invoked by scripts/seed-mongo.ts (never at app runtime).
-import bcrypt from "bcryptjs";
 import type { Repo } from "./types";
 import { DEMO_TEAMS, DEMO_TOOLS } from "./seed-data";
+import { hashPassword } from "@/lib/password.server";
 
 export function assertSeedAllowed(env: Record<string, string | undefined>, argv: string[]): void {
   if (!argv.includes("--confirm"))
@@ -35,7 +35,7 @@ export async function seedDemo(
       throw new Error(`No secure temporary password was provided for ${d.teamCode}.`);
     await repo.createTeam({
       ...d,
-      passwordHash: await bcrypt.hash(password, 12),
+      passwordHash: await hashPassword(password),
       mustChangePassword: true,
       isDemo: true,
     });

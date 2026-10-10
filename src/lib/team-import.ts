@@ -1,4 +1,4 @@
-const REQUIRED_HEADERS = ["teamcode", "teamname", "member1name", "member2name", "email"];
+const REQUIRED_HEADERS = ["teamCode", "teamName", "member1Name", "member2Name", "email"];
 const MAX_CSV_LENGTH = 200_000;
 const MAX_IMPORT_ROWS = 200;
 
@@ -62,7 +62,7 @@ export function parseTeamCsv(input: string): ImportedTeamRow[] {
   if (records.length < 2) throw new Error("CSV must contain a header and at least one team.");
 
   const headers = records[0]!.map((header) => header.trim().toLowerCase());
-  const indexes = REQUIRED_HEADERS.map((header) => headers.indexOf(header));
+  const indexes = REQUIRED_HEADERS.map((header) => headers.indexOf(header.toLowerCase()));
   if (indexes.some((index) => index < 0) || new Set(indexes).size !== indexes.length) {
     throw new Error(`CSV must include these headers: ${REQUIRED_HEADERS.join(", ")}.`);
   }

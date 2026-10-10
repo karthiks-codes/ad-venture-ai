@@ -1,8 +1,8 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentTeam } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
+import { hashPassword, verifyPassword } from "@/lib/password.server";
 import { setSession } from "@/lib/session.server";
 
 export const runtime = "nodejs";
@@ -30,11 +30,11 @@ export async function POST(request: Request) {
   try {
     const current = await getCurrentTeam({ allowPasswordChange: true });
     if (!current) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-    if (!(await bcrypt.compare(parsed.data.currentPassword, current.team.passwordHash))) {
+    if (!(await verifyPassword(parsed.data.currentPassword, current.team.passwordHash))) {
       return NextResponse.json({ error: "Your current password is incorrect." }, { status: 400 });
     }
 
-    const passwordHash = await bcrypt.hash(parsed.data.newPassword, 12);
+    const passwordHash = await hashPassword(parsed.data.newPassword);
     const team = await getRepo().updateTeam(current.team.id, {
       passwordHash,
       mustChangePassword: false,

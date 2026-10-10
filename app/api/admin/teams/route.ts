@@ -1,10 +1,10 @@
-import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { DuplicateError } from "@/lib/db/types";
 import { sendEmail, templates } from "@/lib/email.server";
+import { hashPassword } from "@/lib/password.server";
 import { randomToken } from "@/lib/session.server";
 
 export const runtime = "nodejs";
@@ -42,10 +42,10 @@ export async function POST(request: Request) {
       { status: 400 },
     );
 
-  const password = randomToken(24);
-  const passwordHash = await bcrypt.hash(password, 12);
+  const password = randomToken(10);
   const repo = getRepo();
   try {
+    const passwordHash = await hashPassword(password);
     const team = await repo.createTeam({
       ...parsed.data,
       teamCode: parsed.data.teamCode.toUpperCase(),

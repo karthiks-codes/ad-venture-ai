@@ -55,15 +55,6 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <Image
-            alt="Glowing eco sneaker on a cinematic studio pedestal"
-            className="w-full rounded-2xl glow-border"
-            height={1024}
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            src="/hero-product.jpg"
-            width={1536}
-          />
         </div>
       </section>
 

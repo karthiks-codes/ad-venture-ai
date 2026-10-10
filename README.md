@@ -32,6 +32,8 @@ npm run dev
 
 The app is available at `http://localhost:3000`. Generate an `AUTH_SECRET` with `openssl rand -base64 48`. Do not commit `.env.local`.
 
+For local testing only, set `DEV_PLAINTEXT_PASSWORDS=true` in `.env.local` to store newly created or changed team passwords without bcrypt hashing. This also enables login with those plaintext values. Existing bcrypt hashes continue to work. Never set this in production; the application rejects the setting when `NODE_ENV` or `VERCEL_ENV` is `production`. Before disabling the switch, reset any test accounts created or changed while it was enabled; plaintext passwords cannot be verified after the switch is off.
+
 ### Local demo mode
 
 Set `DEMO_MODE=true` and `DEMO_TEAM_PASSWORD` in `.env.local` to use an in-memory sample dataset for local UI testing. The six sample teams and demo AI tools are process-memory fixtures; they disappear on restart and are never a production data source. Do not use this mode for the event or for persistence testing. Production rejects demo mode unless a separate explicit override is configured in code.
