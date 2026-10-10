@@ -25,6 +25,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
           maxVideoSizeBytes: Number(data.get("maxVideoSizeBytes")),
           allowedVideoTypes: data.getAll("allowedVideoTypes"),
           uploadEnabled: data.get("uploadEnabled") === "on",
+          emailServiceEnabled: data.get("emailServiceEnabled") === "on",
           eventActive: data.get("eventActive") === "on",
         }),
       });
@@ -105,6 +106,21 @@ export function SettingsForm({ settings }: { settings: Settings }) {
       <label className="flex items-center gap-2 text-sm">
         <input defaultChecked={settings.uploadEnabled} name="uploadEnabled" type="checkbox" />
         Allow final video uploads
+      </label>
+      <label className="flex items-start gap-2 text-sm">
+        <input
+          className="mt-0.5"
+          defaultChecked={settings.emailServiceEnabled}
+          name="emailServiceEnabled"
+          type="checkbox"
+        />
+        <span>
+          <span className="block font-semibold">Enable email service</span>
+          <span className="mt-1 block text-muted-foreground">
+            When disabled, team credential, password reset and submission emails will not be sent.
+            Enabling this switch requires valid Gmail API credentials in the server environment.
+          </span>
+        </span>
       </label>
       <label className="flex items-center gap-2 text-sm">
         <input defaultChecked={settings.eventActive} name="eventActive" type="checkbox" />

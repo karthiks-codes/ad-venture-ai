@@ -19,6 +19,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     const repo = getRepo();
     const team = await repo.getTeam(id);
     if (!team) return NextResponse.json({ error: "Team account was not found." }, { status: 404 });
+    if (!(await repo.getSettings()).emailServiceEnabled) {
+      return NextResponse.json(
+        { error: "Email service is disabled. Enable it before resetting team credentials." },
+        { status: 409 },
+      );
+    }
     const temporaryPassword = randomToken(24);
     const baseUrl = process.env["NEXT_PUBLIC_APP_URL"];
     if (!baseUrl)
@@ -34,7 +40,8 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     });
     await repo.revokeResetTokens(team.id);
     try {
-      await sendEmail(
+      const delivery = await sendEmail(
+        repo,
         team.email,
         templates.credentials({
           teamName: team.teamName,
@@ -43,6 +50,15 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
           loginUrl: new URL("/login", baseUrl).toString(),
         }),
       );
+      if (!delivery.sent) {
+        return NextResponse.json(
+          {
+            error:
+              "Email service was disabled before delivery. Credentials were rotated but not emailed; retry after enabling email.",
+          },
+          { status: 503 },
+        );
+      }
     } catch (error) {
       console.error(
         "[admin-team-credentials] Credential email failed",

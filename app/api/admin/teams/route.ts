@@ -58,7 +58,8 @@ export async function POST(request: Request) {
     try {
       const baseUrl = process.env["NEXT_PUBLIC_APP_URL"];
       if (!baseUrl) throw new Error("NEXT_PUBLIC_APP_URL is not configured.");
-      await sendEmail(
+      const delivery = await sendEmail(
+        repo,
         team.email,
         templates.credentials({
           teamName: team.teamName,
@@ -67,8 +68,10 @@ export async function POST(request: Request) {
           loginUrl: new URL("/login", baseUrl).toString(),
         }),
       );
-      await repo.updateTeam(team.id, { status: "active" });
-      emailSent = true;
+      if (delivery.sent) {
+        await repo.updateTeam(team.id, { status: "active" });
+        emailSent = true;
+      }
     } catch (error) {
       console.error(
         "[admin-team-create] Credential email failed",

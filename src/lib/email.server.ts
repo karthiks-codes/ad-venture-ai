@@ -2,6 +2,7 @@ import "server-only";
 import { OAuth2Client } from "google-auth-library";
 import { randomUUID } from "node:crypto";
 import { EVENT } from "@/config/event";
+import type { Repo } from "@/lib/db/types";
 
 export type Mail = { to: string; subject: string; html: string; text: string };
 interface EmailProvider {
@@ -166,9 +167,10 @@ export const templates = {
   }),
 };
 
-export async function sendEmail(to: string, mail: Omit<Mail, "to">) {
+export async function sendEmail(repo: Repo, to: string, mail: Omit<Mail, "to">) {
+  if (!(await repo.getSettings()).emailServiceEnabled) return { sent: false as const };
   const mailProvider = provider();
   const result = await mailProvider.send({ ...mail, to });
   if (!result.ok) throw new Error(`${mailProvider.name} did not confirm the email request.`);
-  return { ...result, provider: mailProvider.name };
+  return { ...result, provider: mailProvider.name, sent: true as const };
 }

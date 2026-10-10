@@ -97,6 +97,8 @@ Email sends through the Gmail API as one organizer-controlled Gmail or Google Wo
 
 `NEXT_PUBLIC_APP_URL` must be the public application origin so credential and reset links are correct. Team creation/credential reset, password recovery and submission confirmation use this Gmail provider. The API acceptance response is not proof of inbox delivery; verify a real test message in the sender's Sent folder and the recipient inbox. Gmail has sending quotas and anti-abuse policies; confirm the mailbox can send the expected event volume (including resets and retries) before importing all teams. If Gmail throttles sends, the operation reports an error and does not claim email acceptance.
 
+Email sending can be enabled or disabled from `/admin/settings`. When disabled, outbound email is not sent; newly created/imported teams remain inactive until credentials are emailed. Enabling the switch does not replace Gmail configuration: valid Gmail API credentials must still be configured in the server environment.
+
 The admin Teams page accepts CSV imports with `teamCode,teamName,member1Name,member2Name,email` headers (headers are case-insensitive and may be in any order). Quoted commas and escaped quotes are supported. Each import is limited to 200 rows and 200 KB; existing team codes/emails are reported per row. Accounts activate only after Gmail accepts their credential email, so configure and test email before importing event teams.
 
 ## Google Drive resumable uploads

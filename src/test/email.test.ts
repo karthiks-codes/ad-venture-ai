@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { createGmailRawMessage } from "@/lib/email.server";
+import { createGmailRawMessage, sendEmail } from "@/lib/email.server";
+import { createMemoryRepo } from "@/lib/db/memory.server";
 
 describe("Gmail API MIME messages", () => {
+  it("does not send when the email service is disabled", async () => {
+    const repo = createMemoryRepo({ seed: false });
+    await repo.updateSettings({ emailServiceEnabled: false });
+
+    await expect(
+      sendEmail(repo, "team@example.test", {
+        subject: "Test",
+        text: "Test email",
+        html: "<p>Test email</p>",
+      }),
+    ).resolves.toEqual({ sent: false });
+  });
+
   it("encodes multipart text and HTML email as Gmail base64url raw content", () => {
     const raw = createGmailRawMessage(
       {

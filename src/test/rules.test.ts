@@ -32,6 +32,7 @@ const settings: Settings = {
   maxVideoSizeBytes: 1024 ** 3,
   allowedVideoTypes: ["video/mp4"],
   uploadEnabled: true,
+  emailServiceEnabled: true,
   eventActive: true,
 };
 const base = {

@@ -91,10 +91,11 @@ export async function POST(request: Request) {
       meta: { fileId: file.id, fileName: file.name, size },
     });
 
-    let emailSent = true;
+    let emailSent = false;
     try {
       const completedAt = finalized.uploadCompletedAt ?? new Date().toISOString();
-      await sendEmail(
+      const delivery = await sendEmail(
+        repo,
         current.team.email,
         templates.submitted({
           teamName: current.team.teamName,
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
           at: completedAt,
         }),
       );
+      emailSent = delivery.sent;
     } catch (error) {
       emailSent = false;
       console.error(

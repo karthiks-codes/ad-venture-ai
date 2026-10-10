@@ -8,6 +8,7 @@ export type Settings = {
   maxVideoSizeBytes: number;
   allowedVideoTypes: string[];
   uploadEnabled: boolean;
+  emailServiceEnabled: boolean;
   eventActive: boolean;
 };
 

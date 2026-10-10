@@ -38,6 +38,13 @@ export async function POST(request: NextRequest) {
         { status: 429 },
       );
     }
+    if (!(await repo.getSettings()).emailServiceEnabled) {
+      return NextResponse.json({
+        ok: true,
+        message:
+          "If an active team account uses that address, reset instructions will be sent when email service is available.",
+      });
+    }
     const team = await repo.findTeamByLogin(email);
     let resetMail: ReturnType<typeof templates.reset>;
     if (team?.status === "active" && team.email === email) {
@@ -60,7 +67,7 @@ export async function POST(request: NextRequest) {
     } else {
       resetMail = templates.resetUnavailable();
     }
-    await sendEmail(email, resetMail);
+    await sendEmail(repo, email, resetMail);
     return NextResponse.json({
       ok: true,
       message: "If an active team account uses that address, reset instructions will be sent.",

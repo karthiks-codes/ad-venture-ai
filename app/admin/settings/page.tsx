@@ -16,6 +16,7 @@ export default async function AdminSettingsPage() {
     ["Submission deadline", settings.submissionDeadline],
     ["Timezone", settings.timezone],
     ["Upload enabled", String(settings.uploadEnabled)],
+    ["Email service enabled", String(settings.emailServiceEnabled)],
     ["Event active", String(settings.eventActive)],
     ["Maximum video size", formatBytes(settings.maxVideoSizeBytes)],
     ["Allowed MIME types", settings.allowedVideoTypes.join(", ")],
@@ -24,7 +25,7 @@ export default async function AdminSettingsPage() {
     <AdminShell admin={admin}>
       <h1 className="text-3xl font-bold">Event settings</h1>
       <p className="mt-2 text-muted-foreground">
-        These settings are persisted in MongoDB and enforced by server-side upload checks.
+        These settings are persisted in MongoDB and enforced by server-side event and email checks.
       </p>
       <dl className="panel mt-6 divide-y divide-border">
         {values.map(([label, value]) => (

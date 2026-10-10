@@ -20,6 +20,7 @@ const settingsSchema = z
       .min(1)
       .max(2),
     uploadEnabled: z.boolean(),
+    emailServiceEnabled: z.boolean(),
     eventActive: z.boolean(),
   })
   .strict();

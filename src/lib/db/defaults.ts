@@ -14,6 +14,7 @@ export function settingsFromEnv(env: Record<string, string | undefined>): Settin
       .map((s) => s.trim())
       .filter(Boolean),
     uploadEnabled: false,
+    emailServiceEnabled: true,
     eventActive: true,
   };
 }

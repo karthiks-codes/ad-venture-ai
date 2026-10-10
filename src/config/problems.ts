@@ -54,7 +54,6 @@ export const PROBLEMS: ProblemStatement[] = [
       "College students and café-goers, 18–35, who care about everyday sustainability.",
     sellingProposition: "Turns farm waste into your daily ritual — no plastic, no guilt.",
     constraints: [
-      "Must reference the farm-to-cup journey",
       "Indian context encouraged",
       "No disparaging competitors",
     ],

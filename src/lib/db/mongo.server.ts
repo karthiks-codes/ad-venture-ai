@@ -370,7 +370,7 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
       const d = await c.findOne({ _id: "current" });
       if (d) {
         const { _id, ...s } = d;
-        return s;
+        return { ...settingsFromEnv(process.env), ...s };
       }
       const s = settingsFromEnv(process.env);
       await c.updateOne({ _id: "current" }, { $setOnInsert: s }, { upsert: true });
