@@ -158,10 +158,10 @@ export const templates = {
   }),
   submitted: (p: { teamName: string; fileName: string; at: string }): Omit<Mail, "to"> => ({
     subject: "ADventure 2026 — submission received",
-    text: `Hello ${p.teamName}, we received "${p.fileName}" at ${p.at}. Good luck in the presentations!`,
+    text: `Hello ${p.teamName}, we received "${p.fileName}" at ${p.at}. The jury will review submissions later; winners and prize distribution will be announced after judging.`,
     html: layout(
       "Submission received",
-      `<p>We received <b>${escapeHtml(p.fileName)}</b> at ${escapeHtml(p.at)}.</p><p>Good luck in the presentations!</p>`,
+      `<p>We received <b>${escapeHtml(p.fileName)}</b> at ${escapeHtml(p.at)}.</p><p>The jury will review submissions later; winners and prize distribution will be announced after judging.</p>`,
     ),
   }),
 };

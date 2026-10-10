@@ -8,9 +8,9 @@ export const runtime = "nodejs";
 
 const sections = [
   ["Your challenge", "/dashboard/challenge"],
-  ["AI toolkit", "/dashboard/ai-toolkit"],
   ["Final submission", "/dashboard/submission"],
   ["Team profile", "/dashboard/profile"],
+  ["Need help?", "/dashboard/ai-toolkit"],
 ] as const;
 
 export default async function TeamDashboardPage() {
@@ -76,7 +76,7 @@ export default async function TeamDashboardPage() {
                 ["Account active", current.team.status === "active"],
                 ["Problem selected", Boolean(current.team.problemId)],
                 ["Challenge reviewed", Boolean(current.team.challengeViewedAt)],
-                ["AI toolkit explored", Boolean(current.team.toolkitViewedAt)],
+                ["Help tools explored", Boolean(current.team.toolkitViewedAt)],
                 ["AI declaration", declaration !== null],
                 ["Final submission", submission?.status === "submitted"],
               ].map(([label, done]) => (

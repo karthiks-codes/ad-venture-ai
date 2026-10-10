@@ -98,7 +98,7 @@ export default async function ChallengePage() {
           className="mt-8 inline-flex rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground"
           href="/dashboard/ai-toolkit"
         >
-          Explore the AI toolkit
+          Need help?
         </Link>
       </section>
     </main>

@@ -24,11 +24,6 @@ export const CRITERIA = [
     desc: "A clear arc — hook, tension, payoff — in seconds.",
   },
   {
-    key: "persuasion",
-    title: "Persuasiveness",
-    desc: "Would the audience actually want the product?",
-  },
-  {
     key: "production",
     title: "Video Production Quality",
     desc: "Visual polish, pacing, sound and edit craft.",
@@ -47,7 +42,6 @@ export const STEPS = [
   "Create assets with AI tools",
   "Edit your short video",
   "Submit the final video once",
-  "Present to the jury",
 ] as const;
 
 export const TIMELINE = [
@@ -55,6 +49,5 @@ export const TIMELINE = [
   { time: "1:40 PM", label: "Problem statement draw" },
   { time: "1:45 PM", label: "Ideation, AI creation & editing" },
   { time: "3:30 PM", label: "Submission deadline (default)" },
-  { time: "3:35 PM", label: "Presentations & judging" },
   { time: "4:00 PM", label: "Wrap-up" },
 ] as const;

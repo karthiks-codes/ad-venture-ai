@@ -37,8 +37,9 @@ export default function HomePage() {
               </li>
             </ul>
             <p className="mt-6 max-w-md text-muted-foreground">
-              Receive a product, conceptualize an ad, create it with AI, edit a short video,
-              submit—and pitch it to the jury.
+              Receive a product, conceptualize an ad, create it with AI, edit a short video and
+              submit. The jury will review submissions later; winners and prize distribution will be
+              announced after judging.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -60,7 +61,7 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-6xl px-6 py-16">
         <p className="text-sm font-bold uppercase tracking-widest text-accent">
-          From product to pitch
+          From product to submission
         </p>
         <h2 className="mt-2 text-3xl font-bold">Make something worth remembering.</h2>
         <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -78,7 +79,7 @@ export default function HomePage() {
           <Sparkles aria-hidden="true" className="text-accent" />
           Evaluation criteria
         </h2>
-        <div className="mt-8 grid gap-4 md:grid-cols-5">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CRITERIA.map((criterion) => (
             <article className="panel p-5" key={criterion.key}>
               <h3 className="text-sm font-bold">{criterion.title}</h3>

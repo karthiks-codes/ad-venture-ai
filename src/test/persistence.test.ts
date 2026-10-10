@@ -79,9 +79,13 @@ describe("memory repository behavior in explicitly selected demo mode", () => {
       ),
     );
     expect(assignments.every(Boolean)).toBe(true);
-    expect(Object.values(await repo.assignmentCounts())).toEqual(
-      Array.from({ length: 10 }, () => 3),
-    );
+    const counts = Object.values(await repo.assignmentCounts());
+    expect(counts.reduce((total, count) => total + count, 0)).toBe(30);
+    expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+  });
+
+  it("keeps the period-care challenge out of the current problem set", () => {
+    expect(PROBLEMS.some((problem) => problem.id === "reusable-period-care")).toBe(false);
   });
 
   it("does not start a second upload while the first is interrupted", async () => {

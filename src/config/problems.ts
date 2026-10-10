@@ -243,30 +243,6 @@ export const PROBLEMS: ProblemStatement[] = [
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Voice / TTS"],
     capacity: 20,
   },
-  {
-    id: "reusable-period-care",
-    code: "P-10",
-    title: "Reusable Period-Care Pouch",
-    hook: "Ready for the day, on your own terms.",
-    description:
-      "Introduce 'Everyday Ease', a discreet, washable carry pouch with thoughtfully separated compartments for period-care essentials and a small emergency kit.",
-    targetAudience: "Students and commuters who want practical, private organisation on the go.",
-    sellingProposition: "A considered everyday design that makes preparedness feel simple.",
-    constraints: [
-      "Use respectful, inclusive language",
-      "Do not make medical claims",
-      "Avoid shame-based messaging and show the product discreetly",
-    ],
-    objective: "Present practical period-care organisation as a confident everyday choice.",
-    duration: "30–45 seconds",
-    angles: [
-      "A calm morning that stays on schedule",
-      "A friend-to-friend moment of preparedness",
-      "The pouch’s quiet role in a full day",
-    ],
-    toolCategories: ["Script & Copy", "Image Generation", "Voice / TTS", "Editing"],
-    capacity: 20,
-  },
 ];
 
 export const getProblem = (id: string | null | undefined) =>

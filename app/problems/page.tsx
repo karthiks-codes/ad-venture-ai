@@ -1,4 +1,5 @@
 import { PROBLEMS } from "@/config/problems";
+import Link from "next/link";
 import { SiteHeader } from "../_components/site-header";
 
 export default function ProblemsPage() {
@@ -17,7 +18,11 @@ export default function ProblemsPage() {
         </p>
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
           {PROBLEMS.map((problem) => (
-            <article className="panel flex flex-col p-6" key={problem.id}>
+            <Link
+              className="panel flex flex-col p-6 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              href={`/problems/${problem.id}`}
+              key={problem.id}
+            >
               <span className="text-xs font-bold tracking-widest text-primary">{problem.code}</span>
               <h2 className="mt-3 text-xl font-bold">{problem.title}</h2>
               <p className="mt-2 text-sm font-semibold text-accent">{problem.hook}</p>
@@ -28,7 +33,8 @@ export default function ProblemsPage() {
                 <span className="font-bold text-foreground">Audience: </span>
                 {problem.targetAudience}
               </p>
-            </article>
+              <span className="mt-5 text-sm font-bold text-primary">View full brief →</span>
+            </Link>
           ))}
         </div>
       </section>

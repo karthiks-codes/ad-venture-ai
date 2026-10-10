@@ -71,6 +71,7 @@ export type AiTool = {
 export type AiDeclaration = {
   teamId: string;
   toolIds: string[];
+  otherTools?: string[];
   description: string;
   rulesConfirmed: boolean;
   originalityConfirmed: boolean;

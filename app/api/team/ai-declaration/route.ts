@@ -5,12 +5,15 @@ import { getRepo } from "@/lib/db/index.server";
 
 export const runtime = "nodejs";
 
-const declarationSchema = z.object({
-  toolIds: z.array(z.string().min(1).max(100)).min(1).max(30),
-  description: z.string().trim().min(20).max(2000),
-  rulesConfirmed: z.literal(true),
-  originalityConfirmed: z.literal(true),
-});
+const declarationSchema = z
+  .object({
+    toolIds: z.array(z.string().min(1).max(100)).max(30),
+    otherTools: z.array(z.string().trim().min(1).max(100)).max(30).default([]),
+    description: z.string().trim().min(20).max(2000),
+    rulesConfirmed: z.literal(true),
+    originalityConfirmed: z.literal(true),
+  })
+  .refine((declaration) => declaration.toolIds.length > 0 || declaration.otherTools.length > 0);
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -24,7 +27,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Select at least one tool, describe its contribution, and confirm both acknowledgements.",
+          "Select a sample tool or list another tool you used, describe its contribution, and confirm both acknowledgements.",
       },
       { status: 400 },
     );

@@ -23,8 +23,8 @@ const rules = [
     "Submit one final video through the team workspace before the configured deadline. The server checks the event window, allowed format and maximum size.",
   ],
   [
-    "Presentation and judging",
-    "Teams will present their advertisement to the jury. Entries are assessed for creativity and originality, storytelling, persuasiveness, video production quality and overall impact.",
+    "Submissions and judging",
+    "Teams submit their final advertisement through the team workspace; there are no presentations to the jury. The jury will review submissions later, and winners and prize distribution will be announced after judging.",
   ],
 ];
 

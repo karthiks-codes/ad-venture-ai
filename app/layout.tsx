@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "The AI-powered advertising competition at BVRIT Hyderabad Innovation Day.",
   openGraph: {
     title: "ADventure 2026 — AI Ad Competition",
-    description: "Draw a product, create an AI-powered ad, submit and present on 13 October 2026.",
+    description: "Draw a product, create an AI-powered ad and submit it on 13 October 2026.",
     type: "website",
   },
 };
