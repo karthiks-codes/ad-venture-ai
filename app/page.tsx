@@ -90,7 +90,7 @@ export default function HomePage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <h2 className="text-3xl font-bold">Event timeline</h2>
+        <h2 className="text-3xl font-bold">Event timeline (Tentative)</h2>
         <ul className="mt-8 divide-y panel">
           {TIMELINE.map((item) => (
             <li className="flex gap-6 px-5 py-4" key={item.time}>
