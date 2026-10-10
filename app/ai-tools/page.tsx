@@ -1,9 +1,25 @@
 import Link from "next/link";
-import { DEMO_TOOLS } from "@/lib/db/seed-data";
+import { getRepo } from "@/lib/db/index.server";
+import type { AiTool } from "@/lib/db/types";
 import { SiteHeader } from "../_components/site-header";
 
-export default function AiToolsPage() {
-  const tools = DEMO_TOOLS;
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export default async function AiToolsPage() {
+  let tools: AiTool[];
+  let unavailable = false;
+  try {
+    tools = await getRepo().listTools();
+  } catch (error) {
+    console.error(
+      "[public-toolkit] Toolkit configuration unavailable",
+      error instanceof Error ? error.name : "unknown",
+    );
+    tools = [];
+    unavailable = true;
+  }
+
   const categories = [...new Set(tools.map((tool) => tool.category))];
   return (
     <main className="min-h-screen">
@@ -24,35 +40,54 @@ export default function AiToolsPage() {
             other AI tools instead or alongside them.
           </p>
         </aside>
-        {categories.map((category) => (
-          <section className="mt-10" key={category}>
-            <h2 className="text-2xl font-bold">{category}</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {tools
-                .filter((tool) => tool.category === category)
-                .map((tool) => (
-                  <a
-                    className="panel block p-5 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    href={tool.url}
-                    key={tool.id}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <h3 className="font-bold">{tool.name}</h3>
-                      {tool.recommended && (
-                        <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-bold text-accent">
-                          Recommended
+        {unavailable ? (
+          <div className="panel mt-8 p-6" role="status">
+            <h2 className="font-bold">Toolkit configuration is unavailable</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              The sample tools could not be loaded. Please try again later; other public event pages
+              remain available.
+            </p>
+          </div>
+        ) : (
+          <>
+            {categories.map((category) => (
+              <section className="mt-10" key={category}>
+                <h2 className="text-2xl font-bold">{category}</h2>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {tools
+                    .filter((tool) => tool.category === category)
+                    .map((tool) => (
+                      <a
+                        className="panel block p-5 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        href={tool.url}
+                        key={tool.id}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <h3 className="font-bold">{tool.name}</h3>
+                          {tool.recommended && (
+                            <span className="rounded-full bg-accent/15 px-3 py-1 text-xs font-bold text-accent">
+                              Recommended
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-2 text-sm text-muted-foreground">{tool.description}</p>
+                        <span className="mt-4 inline-flex font-semibold text-primary">
+                          Open tool ↗
                         </span>
-                      )}
-                    </div>
-                    <p className="mt-2 text-sm text-muted-foreground">{tool.description}</p>
-                    <span className="mt-4 inline-flex font-semibold text-primary">Open tool ↗</span>
-                  </a>
-                ))}
-            </div>
-          </section>
-        ))}
+                      </a>
+                    ))}
+                </div>
+              </section>
+            ))}
+            {tools.length === 0 && (
+              <p className="panel mt-8 p-6 text-muted-foreground">
+                No tools are currently enabled.
+              </p>
+            )}
+          </>
+        )}
         <Link
           className="mt-10 inline-flex rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground"
           href="/login"

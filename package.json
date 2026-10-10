@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "db:seed": "node --conditions=react-server --import tsx scripts/seed-mongo.ts",
+    "db:seed-tools": "node --conditions=react-server --import tsx scripts/seed-tools.ts",
     "db:smoke": "node --conditions=react-server --import tsx scripts/smoke-mongo.ts",
     "admin:bootstrap": "node --conditions=react-server --import tsx scripts/bootstrap-admin.ts",
     "test": "vitest run",

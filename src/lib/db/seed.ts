@@ -19,6 +19,36 @@ export function assertSeedAllowed(env: Record<string, string | undefined>, argv:
 
 export type SeedResult = { teamsCreated: string[]; teamsSkipped: string[]; toolsUpserted: number };
 
+/** Upserts only the sample AI tools; it never reads or modifies team records. */
+export async function seedTools(repo: Repo): Promise<number> {
+  for (const tool of DEMO_TOOLS) await repo.upsertTool(tool);
+  const savedTools = new Map((await repo.listTools()).map((tool) => [tool.id, tool]));
+  const missingTools = DEMO_TOOLS.filter((tool) => {
+    const saved = savedTools.get(tool.id);
+    return (
+      !saved ||
+      saved.name !== tool.name ||
+      saved.category !== tool.category ||
+      saved.url !== tool.url ||
+      saved.description !== tool.description ||
+      saved.recommended !== tool.recommended ||
+      saved.enabled !== tool.enabled ||
+      saved.order !== tool.order
+    );
+  });
+  if (missingTools.length > 0) {
+    throw new Error(
+      `Sample tools could not be verified after seeding: ${missingTools.map((tool) => tool.id).join(", ")}.`,
+    );
+  }
+  await repo.log({
+    actor: "seed-script",
+    action: "seed.tools",
+    meta: { toolsUpserted: DEMO_TOOLS.length },
+  });
+  return DEMO_TOOLS.length;
+}
+
 /** Inserts demo teams that don't exist yet (by teamCode); upserts sample tools by id. Safe to re-run. */
 export async function seedDemo(
   repo: Repo,

@@ -3,8 +3,8 @@ import { pickProblem } from "@/lib/allocation";
 import { createMemoryRepo } from "@/lib/db/memory.server";
 import { DuplicateError } from "@/lib/db/types";
 import { chooseRepo } from "@/lib/db/select";
-import { assertSeedAllowed, seedDemo } from "@/lib/db/seed";
-import { DEMO_TEAMS } from "@/lib/db/seed-data";
+import { assertSeedAllowed, seedDemo, seedTools } from "@/lib/db/seed";
+import { DEMO_TEAMS, DEMO_TOOLS } from "@/lib/db/seed-data";
 import { PROBLEMS } from "@/config/problems";
 
 describe("repository selection", () => {
@@ -171,6 +171,15 @@ describe("explicit MongoDB seed safety", () => {
     expect(() =>
       assertSeedAllowed({ NODE_ENV: "production", MONGODB_DB_NAME: "adventure" }, ["--confirm"]),
     ).toThrow(/production-like/);
+  });
+
+  it("upserts only the sample tools without creating or changing teams", async () => {
+    const repo = createMemoryRepo({ seed: false });
+    const toolsUpserted = await seedTools(repo);
+
+    expect(toolsUpserted).toBe(DEMO_TOOLS.length);
+    expect(await repo.listTools(true)).toEqual(DEMO_TOOLS);
+    expect(await repo.listTeams()).toEqual([]);
   });
 
   it("seeds synthetic team fixtures idempotently using supplied temporary passwords", async () => {

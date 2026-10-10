@@ -52,7 +52,17 @@ Set `DEMO_MODE=true` and `DEMO_TEAM_PASSWORD` in `.env.local` to use an in-memor
 
    The command refuses to run without `--confirm` and refuses production-like targets unless `SEED_ALLOW_PRODUCTION=true` is explicitly supplied. Seeded team passwords are independently generated and hashed; they are never printed. The `.test` email addresses are intentionally non-deliverable and are not event credentials. The script is idempotent and does not overwrite existing teams.
 
-6. To verify read/write connectivity using a uniquely named temporary document:
+6. To add or refresh only the sample AI tools in MongoDB, run:
+
+   ```sh
+   npm run db:seed-tools -- --confirm
+   ```
+
+   This upserts the 13 sample tools by ID without creating or modifying team records. It loads
+   `.env.local`, requires MongoDB settings, and applies the same production-database guard as the
+   demo seed command. The public and team tool pages then load enabled tools from MongoDB.
+
+7. To verify read/write connectivity using a uniquely named temporary document:
 
    ```sh
    npm run db:smoke
