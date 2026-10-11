@@ -1,12 +1,57 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type ClipboardEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { parseTeamCredential } from "@/lib/team-credential";
 
 export function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const token = params.get("access");
+    if (!token) return;
+
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    setPending(true);
+    void (async () => {
+      try {
+        const response = await fetch("/api/auth/team/magic-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+        const result = (await response.json()) as {
+          ok?: boolean;
+          mustChangePassword?: boolean;
+          error?: string;
+        };
+        if (!response.ok) {
+          setError(result.error || "This sign-in link is invalid or expired.");
+          return;
+        }
+        router.replace(result.mustChangePassword ? "/change-password" : "/dashboard");
+        router.refresh();
+      } catch {
+        setError("Unable to verify the sign-in link. Please try again.");
+      } finally {
+        setPending(false);
+      }
+    })();
+  }, [router]);
+
+  function handleCredentialPaste(event: ClipboardEvent<HTMLInputElement>) {
+    const credential = parseTeamCredential(event.clipboardData.getData("text"));
+    if (!credential) return;
+
+    event.preventDefault();
+    setIdentifier(credential.teamCode);
+    setPassword(credential.password);
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,7 +94,10 @@ export function LoginForm() {
           className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3"
           id="identifier"
           name="identifier"
+          onChange={(event) => setIdentifier(event.target.value)}
+          onPaste={handleCredentialPaste}
           required
+          value={identifier}
         />
       </label>
       <label className="block text-sm font-semibold" htmlFor="password">
@@ -59,8 +107,10 @@ export function LoginForm() {
           className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3"
           id="password"
           name="password"
+          onChange={(event) => setPassword(event.target.value)}
           required
           type="password"
+          value={password}
         />
       </label>
       {error && (
@@ -76,7 +126,7 @@ export function LoginForm() {
         disabled={pending}
         type="submit"
       >
-        {pending ? "Signing in…" : "Sign in to your team"}
+        {pending ? "Signing in securely…" : "Sign in to your team"}
       </button>
       <p className="text-center text-xs text-muted-foreground">
         Team accounts are created by the event organizers. Public registration is not available.

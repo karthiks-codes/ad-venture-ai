@@ -1,8 +1,93 @@
 import { describe, expect, it } from "vitest";
-import { createGmailRawMessage, sendEmail } from "@/lib/email.server";
+import {
+  createGmailRawMessage,
+  createTeamLoginUrl,
+  sendEmail,
+  templates,
+} from "@/lib/email.server";
 import { createMemoryRepo } from "@/lib/db/memory.server";
+import { parseTeamCredential } from "@/lib/team-credential";
+import { sha256 } from "@/lib/session.server";
 
 describe("Gmail API MIME messages", () => {
+  it("parses pasted team credentials at the first equals sign", () => {
+    expect(parseTeamCredential("ADV-030=temporary=password==")).toEqual({
+      teamCode: "ADV-030",
+      password: "temporary=password==",
+    });
+    expect(parseTeamCredential("ADV-030=temporary-password")).toEqual({
+      teamCode: "ADV-030",
+      password: "temporary-password",
+    });
+    expect(
+      parseTeamCredential("Team code: ADV-030\nADV-030=temporary-password\nLogin page: /login"),
+    ).toEqual({ teamCode: "ADV-030", password: "temporary-password" });
+  });
+
+  it("leaves regular identifiers and malformed credentials unchanged", () => {
+    expect(parseTeamCredential("team@example.test")).toBeNull();
+    expect(parseTeamCredential("ADV-030=")).toBeNull();
+    expect(parseTeamCredential("ADV 030=password")).toBeNull();
+  });
+
+  it("formats team credentials as one pasteable team-code=password line", () => {
+    const email = templates.credentials({
+      teamName: "Pixel Pioneers",
+      teamCode: "ADV-030",
+      tempPassword: "temporary-password",
+      loginUrl: "https://adventure.example/login",
+      secureLoginUrl: "https://adventure.example/login#access=single-use-token",
+    });
+
+    expect(email.text).toContain("ADV-030=temporary-password");
+    expect(email.text).toContain("Team code: ADV-030");
+    expect(email.text).toContain("Temporary password: temporary-password");
+    expect(email.text).toContain("Copy this complete line and paste it into the Team code field");
+    expect(email.text).toContain("one-time link, expires in 30 minutes");
+    expect(email.text.indexOf("ADV-030=temporary-password")).toBeLessThan(
+      email.text.indexOf("Enter to login"),
+    );
+    expect(email.html).toContain('href="https://adventure.example/login#access=single-use-token"');
+    expect(email.html).toContain("<code>ADV-030=temporary-password</code>");
+    expect(email.html.indexOf("<code>ADV-030=temporary-password</code>")).toBeLessThan(
+      email.html.indexOf(">Enter to login</a>"),
+    );
+    expect(email.html).toContain("https://adventure.example/login");
+  });
+
+  it("creates a short-lived, single-use login link without exposing its token in the URL query", async () => {
+    const repo = createMemoryRepo({ seed: false });
+    const loginUrl = await createTeamLoginUrl(
+      repo,
+      { id: "team-1", authVersion: 2 },
+      "https://adventure.example/login",
+    );
+    expect(loginUrl).not.toBeNull();
+
+    const url = new URL(loginUrl!);
+    expect(url.search).toBe("");
+    const token = new URLSearchParams(url.hash.slice(1)).get("access");
+    expect(token).toBeTruthy();
+
+    const tokenHash = sha256(token!);
+    expect(await repo.getTeamLoginToken(tokenHash)).toMatchObject({
+      teamId: "team-1",
+      authVersion: 2,
+      usedAt: null,
+    });
+    expect(await repo.consumeTeamLoginToken(tokenHash)).toMatchObject({ teamId: "team-1" });
+    expect(await repo.consumeTeamLoginToken(tokenHash)).toBeNull();
+  });
+
+  it("does not create a sign-in link when email service is disabled", async () => {
+    const repo = createMemoryRepo({ seed: false });
+    await repo.updateSettings({ emailServiceEnabled: false });
+
+    await expect(
+      createTeamLoginUrl(repo, { id: "team-1", authVersion: 0 }, "https://example.test/login"),
+    ).resolves.toBeNull();
+  });
+
   it("does not send when the email service is disabled", async () => {
     const repo = createMemoryRepo({ seed: false });
     await repo.updateSettings({ emailServiceEnabled: false });

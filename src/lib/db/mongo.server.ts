@@ -11,6 +11,7 @@ import type {
   ResetToken,
   Submission,
   Team,
+  TeamLoginToken,
 } from "./types";
 import { DuplicateError, PersistenceUnavailableError } from "./types";
 import type { Settings } from "@/lib/submission-rules";
@@ -94,6 +95,13 @@ export async function ensureIndexes(db: Db) {
       { key: { tokenHash: 1 }, unique: true },
       { key: { expiresAtDate: 1 }, expireAfterSeconds: 0 },
     ]),
+    db
+      .collection("teamLoginTokens")
+      .createIndexes([
+        { key: { tokenHash: 1 }, unique: true },
+        { key: { expiresAtDate: 1 }, expireAfterSeconds: 0 },
+        { key: { teamId: 1 } },
+      ]),
     db
       .collection("rateLimits")
       .createIndexes([{ key: { key: 1, at: 1 } }, { key: { at: 1 }, expireAfterSeconds: 3600 }]),
@@ -472,6 +480,48 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
     },
     async revokeResetTokens(teamId) {
       await (await col<ResetToken>("passwordResetTokens")).deleteMany({ teamId });
+    },
+    async saveTeamLoginToken(token) {
+      await (
+        await col<TeamLoginToken & { expiresAtDate: Date }>("teamLoginTokens")
+      ).insertOne({
+        _id: crypto.randomUUID(),
+        ...token,
+        expiresAtDate: new Date(token.expiresAt),
+      });
+    },
+    async getTeamLoginToken(tokenHash) {
+      const document = await (
+        await col<TeamLoginToken & { expiresAtDate: Date }>("teamLoginTokens")
+      ).findOne({ tokenHash, usedAt: null, expiresAtDate: { $gt: new Date() } });
+      if (!document) return null;
+      return {
+        tokenHash: document.tokenHash,
+        teamId: document.teamId,
+        authVersion: document.authVersion,
+        expiresAt: document.expiresAt,
+        usedAt: document.usedAt,
+      };
+    },
+    async consumeTeamLoginToken(tokenHash) {
+      const document = await (
+        await col<TeamLoginToken & { expiresAtDate: Date }>("teamLoginTokens")
+      ).findOneAndUpdate(
+        { tokenHash, usedAt: null, expiresAtDate: { $gt: new Date() } },
+        { $set: { usedAt: now() } },
+        { returnDocument: "after" },
+      );
+      if (!document) return null;
+      return {
+        tokenHash: document.tokenHash,
+        teamId: document.teamId,
+        authVersion: document.authVersion,
+        expiresAt: document.expiresAt,
+        usedAt: document.usedAt,
+      };
+    },
+    async revokeTeamLoginTokens(teamId) {
+      await (await col<TeamLoginToken>("teamLoginTokens")).deleteMany({ teamId });
     },
 
     async hitRateLimit(key, max, windowMs) {

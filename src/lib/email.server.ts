@@ -2,7 +2,8 @@ import "server-only";
 import { OAuth2Client } from "google-auth-library";
 import { randomUUID } from "node:crypto";
 import { EVENT } from "@/config/event";
-import type { Repo } from "@/lib/db/types";
+import type { Repo, Team } from "@/lib/db/types";
+import { randomToken, sha256 } from "@/lib/session.server";
 
 export type Mail = { to: string; subject: string; html: string; text: string };
 interface EmailProvider {
@@ -103,6 +104,28 @@ function provider(): EmailProvider {
   return gmail;
 }
 
+export async function createTeamLoginUrl(
+  repo: Repo,
+  team: Pick<Team, "id" | "authVersion">,
+  loginUrl: string,
+): Promise<string | null> {
+  if (!(await repo.getSettings()).emailServiceEnabled) return null;
+
+  const token = randomToken();
+  const expiresAt = new Date(Date.now() + 30 * 60_000).toISOString();
+  await repo.saveTeamLoginToken({
+    tokenHash: sha256(token),
+    teamId: team.id,
+    authVersion: team.authVersion ?? 0,
+    expiresAt,
+    usedAt: null,
+  });
+
+  const url = new URL(loginUrl);
+  url.hash = new URLSearchParams({ access: token }).toString();
+  return url.toString();
+}
+
 const escapeHtml = (value: string) =>
   value.replace(
     /[&<>"']/g,
@@ -133,12 +156,13 @@ export const templates = {
     teamCode: string;
     tempPassword: string;
     loginUrl: string;
+    secureLoginUrl?: string | null;
   }): Omit<Mail, "to"> => ({
     subject: `Your ADventure 2026 team login — ${p.teamCode}`,
-    text: `Hello ${p.teamName},\n\nTeam ID: ${p.teamCode}\nTemporary password: ${p.tempPassword}\n\nLog in at ${p.loginUrl}. You will be asked to set a new password on first login.`,
+    text: `Hello ${p.teamName},\n\nYour ADventure team login is ready.\n\nTeam code: ${p.teamCode}\nTemporary password: ${p.tempPassword}\n\nCopy this complete line and paste it into the Team code field:\n\n${p.teamCode}=${p.tempPassword}\n\n${p.secureLoginUrl ? `Enter to login (one-time link, expires in 30 minutes): ${p.secureLoginUrl}` : `Enter to login: ${p.loginUrl}`}\n\nYou will be asked to change this temporary password after signing in.`,
     html: layout(
       `Welcome, ${escapeHtml(p.teamName)}`,
-      `<p>Your team account is ready.</p><p><b>Team ID:</b> ${escapeHtml(p.teamCode)}<br><b>Temporary password:</b> <code>${escapeHtml(p.tempPassword)}</code></p><p><a href="${escapeHtml(p.loginUrl)}" style="color:#5ee0ff">Log in</a> — you'll set a new password on first login.</p>`,
+      `<p>Your ADventure team login is ready.</p><p><b>Team code:</b> <code>${escapeHtml(p.teamCode)}</code><br><b>Temporary password:</b> <code>${escapeHtml(p.tempPassword)}</code></p><p>Copy this complete line and paste it into the <b>Team code or email</b> field:</p><p style="padding:14px;background:#151b32;border-radius:8px;font-family:monospace;font-size:16px;user-select:all"><code>${escapeHtml(p.teamCode)}=${escapeHtml(p.tempPassword)}</code></p><p><a href="${escapeHtml(p.secureLoginUrl ?? p.loginUrl)}" style="color:#5ee0ff">Enter to login</a>${p.secureLoginUrl ? " (one-time link, expires in 30 minutes)." : "."}</p><p>You will be asked to change this temporary password after signing in.</p>`,
     ),
   }),
   reset: (p: { teamName: string; resetUrl: string }): Omit<Mail, "to"> => ({

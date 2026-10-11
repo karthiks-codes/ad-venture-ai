@@ -10,6 +10,7 @@ import type {
   ResetToken,
   Submission,
   Team,
+  TeamLoginToken,
 } from "./types";
 import { DuplicateError } from "./types";
 import type { Settings } from "@/lib/submission-rules";
@@ -27,6 +28,7 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
   const tools = new Map<string, AiTool>();
   const logs: AuditLog[] = [];
   const tokens = new Map<string, ResetToken>();
+  const teamLoginTokens = new Map<string, TeamLoginToken>();
   const hits = new Map<string, number[]>();
   let allocationTail: Promise<void> = Promise.resolve();
   let settings: Settings = { ...settingsFromEnv(process.env), uploadEnabled: true };
@@ -314,6 +316,25 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
     async revokeResetTokens(teamId) {
       for (const [hash, token] of tokens) {
         if (token.teamId === teamId) tokens.delete(hash);
+      }
+    },
+    async saveTeamLoginToken(token) {
+      teamLoginTokens.set(token.tokenHash, { ...token });
+    },
+    async getTeamLoginToken(tokenHash) {
+      const token = teamLoginTokens.get(tokenHash);
+      if (!token || token.usedAt || new Date(token.expiresAt) <= new Date()) return null;
+      return { ...token };
+    },
+    async consumeTeamLoginToken(tokenHash) {
+      const token = teamLoginTokens.get(tokenHash);
+      if (!token || token.usedAt || new Date(token.expiresAt) <= new Date()) return null;
+      token.usedAt = now();
+      return { ...token };
+    },
+    async revokeTeamLoginTokens(teamId) {
+      for (const [hash, token] of teamLoginTokens) {
+        if (token.teamId === teamId) teamLoginTokens.delete(hash);
       }
     },
     async hitRateLimit(key, max, windowMs) {

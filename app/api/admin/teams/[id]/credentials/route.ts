@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
-import { sendEmail, templates } from "@/lib/email.server";
+import { createTeamLoginUrl, sendEmail, templates } from "@/lib/email.server";
 import { hashPassword } from "@/lib/password.server";
 import { randomToken } from "@/lib/session.server";
 
@@ -33,13 +33,18 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         { status: 503 },
       );
 
-    await repo.updateTeam(team.id, {
+    const updatedTeam = await repo.updateTeam(team.id, {
       passwordHash: await hashPassword(temporaryPassword),
       mustChangePassword: true,
       authVersion: (team.authVersion ?? 0) + 1,
     });
+    if (!updatedTeam)
+      return NextResponse.json({ error: "Team account could not be updated." }, { status: 503 });
     await repo.revokeResetTokens(team.id);
+    await repo.revokeTeamLoginTokens(team.id);
     try {
+      const loginUrl = new URL("/login", baseUrl).toString();
+      const secureLoginUrl = await createTeamLoginUrl(repo, updatedTeam, loginUrl);
       const delivery = await sendEmail(
         repo,
         team.email,
@@ -47,10 +52,12 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
           teamName: team.teamName,
           teamCode: team.teamCode,
           tempPassword: temporaryPassword,
-          loginUrl: new URL("/login", baseUrl).toString(),
+          loginUrl,
+          secureLoginUrl,
         }),
       );
       if (!delivery.sent) {
+        await repo.revokeTeamLoginTokens(team.id);
         return NextResponse.json(
           {
             error:
@@ -64,6 +71,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         "[admin-team-credentials] Credential email failed",
         error instanceof Error ? error.name : "unknown",
       );
+      await repo.revokeTeamLoginTokens(team.id);
       return NextResponse.json(
         {
           error:

@@ -92,6 +92,13 @@ export type ResetToken = {
   expiresAt: string;
   usedAt: string | null;
 };
+export type TeamLoginToken = {
+  tokenHash: string;
+  teamId: string;
+  authVersion: number;
+  expiresAt: string;
+  usedAt: string | null;
+};
 export type RepoHealth = {
   kind: "mongodb" | "memory";
   status: "connected" | "error" | "demo";
@@ -149,6 +156,10 @@ export interface Repo {
   saveResetToken(t: ResetToken): Promise<void>;
   consumeResetToken(tokenHash: string): Promise<ResetToken | null>;
   revokeResetTokens(teamId: string): Promise<void>;
+  saveTeamLoginToken(token: TeamLoginToken): Promise<void>;
+  getTeamLoginToken(tokenHash: string): Promise<TeamLoginToken | null>;
+  consumeTeamLoginToken(tokenHash: string): Promise<TeamLoginToken | null>;
+  revokeTeamLoginTokens(teamId: string): Promise<void>;
 
   /** Records one attempt and returns true if still within limit (shared across instances in Mongo). */
   hitRateLimit(key: string, max: number, windowMs: number): Promise<boolean>;

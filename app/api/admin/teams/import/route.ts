@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { DuplicateError } from "@/lib/db/types";
-import { sendEmail, templates } from "@/lib/email.server";
+import { createTeamLoginUrl, sendEmail, templates } from "@/lib/email.server";
 import { hashPassword } from "@/lib/password.server";
 import { randomToken } from "@/lib/session.server";
 import { parseTeamCsv } from "@/lib/team-import";
@@ -78,6 +78,8 @@ export async function POST(request: Request) {
       try {
         const baseUrl = process.env["NEXT_PUBLIC_APP_URL"];
         if (!baseUrl) throw new Error("NEXT_PUBLIC_APP_URL is not configured.");
+        const loginUrl = new URL("/login", baseUrl).toString();
+        const secureLoginUrl = await createTeamLoginUrl(repo, team, loginUrl);
         const delivery = await sendEmail(
           repo,
           team.email,
@@ -85,12 +87,15 @@ export async function POST(request: Request) {
             teamName: team.teamName,
             teamCode: team.teamCode,
             tempPassword: temporaryPassword,
-            loginUrl: new URL("/login", baseUrl).toString(),
+            loginUrl,
+            secureLoginUrl,
           }),
         );
         emailSent = delivery.sent;
         if (delivery.sent) active = Boolean(await repo.updateTeam(team.id, { status: "active" }));
+        else await repo.revokeTeamLoginTokens(team.id);
       } catch (error) {
+        await repo.revokeTeamLoginTokens(team.id);
         console.error(
           "[admin-team-import] Credential email failed",
           error instanceof Error ? error.name : "unknown",

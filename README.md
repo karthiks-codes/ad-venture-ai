@@ -90,6 +90,13 @@ Google OAuth is enabled only for a verified Google identity matching an active d
 4. Open `/admin` and complete Google sign-in.
 
 The bootstrap command requires `MONGODB_URI` and `MONGODB_DB_NAME`; it never uses demo memory.
+To bootstrap multiple accounts through the Python wrapper, set `ADMIN_EMAILS` to comma-separated Google account emails and optionally set `ADMIN_ROLE` (defaults to `admin`), then run:
+
+```sh
+ADMIN_EMAILS="organizer@example.org,admin@example.org" ADMIN_ROLE=admin python3 scripts/bootstrap_admins.py
+```
+
+The wrapper delegates to the same MongoDB-backed bootstrap command, which reads `MONGODB_URI` and `MONGODB_DB_NAME` from the process environment or `.env.local`.
 
 ## Gmail API email
 

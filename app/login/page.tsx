@@ -13,7 +13,8 @@ export default function LoginPage() {
         </p>
         <h1 className="mt-3 text-3xl font-bold">Team login</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in using the credentials sent by your organizers.
+          Enter your team code and password, or paste the complete credential line from your email
+          into the team code field.
         </p>
         <LoginForm />
       </section>
