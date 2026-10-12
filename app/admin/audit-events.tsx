@@ -10,7 +10,7 @@ type AuditEntry = {
   teamCode?: string;
 };
 
-const REFRESH_INTERVAL_MS = 5_000;
+const REFRESH_INTERVAL_MS = 60_000;
 
 export function AuditEvents({ initialLogs }: { initialLogs: AuditEntry[] }) {
   const [logs, setLogs] = useState(initialLogs);
@@ -46,7 +46,7 @@ export function AuditEvents({ initialLogs }: { initialLogs: AuditEntry[] }) {
       <p className="mt-1 text-xs text-muted-foreground" aria-live="polite">
         {refreshError
           ? "Live updates unavailable; showing the last loaded events."
-          : "Updates automatically every 5 seconds."}
+          : "Updates automatically every 60 seconds."}
       </p>
       {logs.length ? (
         <ul className="mt-4 divide-y divide-border">
