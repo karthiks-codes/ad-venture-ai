@@ -160,6 +160,48 @@ button:not(:disabled):hover {
   box-shadow: 0 3px 14px color-mix(in oklch, var(--color-primary) 20%, transparent);
 }
 
+.video-drop-zone {
+  display: block;
+  cursor: pointer;
+  border: 2px dashed color-mix(in oklch, var(--color-primary) 42%, var(--color-border));
+  border-radius: 1rem;
+  background-color: color-mix(in oklch, var(--color-primary) 5%, var(--color-card));
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.video-drop-zone:hover,
+.video-drop-zone:focus-within {
+  border-color: var(--color-primary);
+  background-color: color-mix(in oklch, var(--color-primary) 9%, var(--color-card));
+}
+.video-drop-zone:focus-within {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 3px;
+}
+.video-drop-zone-active {
+  border-color: var(--color-primary);
+  background-color: color-mix(in oklch, var(--color-primary) 14%, var(--color-card));
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary) 14%, transparent);
+}
+.video-drop-zone-disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.video-drop-icon {
+  display: inline-grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 1px solid color-mix(in oklch, var(--color-primary) 34%, transparent);
+  border-radius: 9999px;
+  background-color: color-mix(in oklch, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+}
+
 .problem-card-deck {
   position: relative;
   display: grid;

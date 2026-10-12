@@ -4,6 +4,7 @@ import { getRepo } from "@/lib/db/index.server";
 import { formatBytes } from "@/lib/submission-rules";
 import { getProblem } from "@/config/problems";
 import { AdminShell } from "../_components/admin-shell";
+import { LocalDateTime } from "./local-date-time";
 import { ReopenSubmissionButton } from "./reopen-button";
 
 export const runtime = "nodejs";
@@ -56,7 +57,9 @@ export default async function AdminSubmissionsPage() {
                   <td className="px-4 py-3">
                     {submission.driveFileSize ? formatBytes(submission.driveFileSize) : "—"}
                   </td>
-                  <td className="px-4 py-3">{submission.uploadCompletedAt ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <LocalDateTime value={submission.uploadCompletedAt} />
+                  </td>
                   <td className="px-4 py-3">{submission.status}</td>
                   <td className="px-4 py-3">{declarations[index] ? "Complete" : "Missing"}</td>
                   <td className="px-4 py-3">

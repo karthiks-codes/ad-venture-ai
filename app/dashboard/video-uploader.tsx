@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { Upload } from "lucide-react";
+import { useState, type ChangeEvent, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
 
 const CHUNK_BYTES = 8 * 1024 * 1024;
@@ -121,11 +122,54 @@ export function VideoUploader({
   const [error, setError] = useState("");
   const [confirmationEmailSent, setConfirmationEmailSent] = useState<boolean | null>(null);
   const [reportFileName, setReportFileName] = useState("");
+  const [dragActive, setDragActive] = useState(false);
 
   function chooseFile(event: ChangeEvent<HTMLInputElement>) {
-    setFile(event.target.files?.[0] ?? null);
+    acceptFile(event.target.files?.[0] ?? null);
+    event.target.value = "";
+  }
+
+  function acceptFile(selected: File | null) {
+    setDragActive(false);
     setError("");
     setProgress(0);
+    if (!selected) return;
+    if (!allowedTypes.includes(selected.type)) {
+      setFile(null);
+      setError(`Choose a supported video type: ${allowedTypes.join(", ")}.`);
+      return;
+    }
+    if (selected.size > maxBytes) {
+      setFile(null);
+      setError(
+        `The selected file exceeds the ${Math.round((maxBytes / 1024 ** 3) * 10) / 10} GB limit.`,
+      );
+      return;
+    }
+    setFile(selected);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    if (state === "idle") setDragActive(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
+    if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget))
+      return;
+    setDragActive(false);
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    if (state !== "idle") return;
+    if (event.dataTransfer.files.length !== 1) {
+      setFile(null);
+      setError("Drop one video file at a time.");
+      setDragActive(false);
+      return;
+    }
+    acceptFile(event.dataTransfer.files[0] ?? null);
   }
 
   async function startUpload() {
@@ -254,16 +298,42 @@ export function VideoUploader({
 
   return (
     <div className="mt-6">
-      <label className="block text-sm font-semibold" htmlFor="video-file">
-        Choose your final video
+      <label
+        className={`video-drop-zone ${dragActive ? "video-drop-zone-active" : ""} ${state !== "idle" ? "video-drop-zone-disabled" : ""}`}
+        htmlFor="video-file"
+        onDragEnter={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <input
           accept={allowedTypes.join(",")}
-          className="mt-2 block w-full rounded-xl border border-input bg-background px-4 py-3 text-sm"
+          className="sr-only"
           disabled={state !== "idle"}
           id="video-file"
           onChange={chooseFile}
           type="file"
         />
+        <span className="video-drop-icon" aria-hidden="true">
+          <Upload className="h-6 w-6" />
+        </span>
+        {file ? (
+          <>
+            <span className="mt-3 block break-all font-bold text-foreground">{file.name}</span>
+            <span className="mt-1 block text-sm text-muted-foreground">
+              {(file.size / 1024 ** 3).toFixed(2)} GB · Click or drop to replace
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="mt-3 block font-bold text-foreground">
+              {dragActive ? "Drop your video here" : "Drag and drop your final video"}
+            </span>
+            <span className="mt-1 block text-sm text-muted-foreground">
+              or <span className="font-semibold text-primary underline">browse files</span>
+            </span>
+          </>
+        )}
       </label>
       <p className="mt-2 text-xs text-muted-foreground">
         Allowed formats: {allowedTypes.join(", ")} · Maximum{" "}
