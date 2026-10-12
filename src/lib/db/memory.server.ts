@@ -84,7 +84,7 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
           status: "submitted",
           driveFolderId: "demo-folder",
           driveFileId: "demo-file",
-          driveFileName: "final-video.mp4",
+          driveFileName: '${d.teamCode}-submission-video.mp4',
           driveFileSize: 734_003_200,
           driveWebViewLink: null,
           mimeType: "video/mp4",
