@@ -88,7 +88,7 @@ export default async function AiToolsPage() {
           </>
         )}
         <p className="panel mt-10 max-w-3xl p-5 text-sm text-muted-foreground">
-          Feel free to contact any of the coordinators for help with the event or any of the tools.
+          Feel free to contact any of the coordinators/ volunteers for help with the event or any of the tools.
         </p>
       </section>
     </main>

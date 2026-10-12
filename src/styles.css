@@ -160,10 +160,152 @@ button:not(:disabled):hover {
   box-shadow: 0 3px 14px color-mix(in oklch, var(--color-primary) 20%, transparent);
 }
 
+.problem-card-deck {
+  position: relative;
+  display: grid;
+  width: min(100%, 26rem);
+  height: 13rem;
+  perspective: 1100px;
+}
+.problem-card {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--color-primary) 46%, var(--color-border));
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(ellipse at 85% 0%, color-mix(in oklch, var(--color-primary) 22%, transparent), transparent 58%),
+    linear-gradient(145deg, color-mix(in oklch, var(--color-card) 92%, var(--color-primary)), var(--color-card) 62%);
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 18px 42px color-mix(in oklch, var(--color-background) 35%, transparent);
+}
+.problem-card-back {
+  position: relative;
+  transform-origin: center bottom;
+  border-color: color-mix(in oklch, var(--color-primary) 28%, var(--color-border));
+  background:
+    repeating-linear-gradient(135deg, transparent 0 12px, color-mix(in oklch, var(--color-primary) 5%, transparent) 12px 14px),
+    var(--color-card);
+  padding: 1rem;
+}
+.problem-card-back::after {
+  position: absolute;
+  inset: 0.7rem;
+  border: 1px solid color-mix(in oklch, var(--color-primary) 20%, transparent);
+  border-radius: 0.8rem;
+  content: "";
+}
+.problem-card-back-one { transform: translate(7px, -6px) rotate(3deg); }
+.problem-card-back-two { transform: translate(14px, -12px) rotate(6deg); }
+.problem-card-back-three { transform: translate(20px, -18px) rotate(9deg); }
+.problem-card-shuffling .problem-card-front {
+  animation: problem-card-shuffle 620ms cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+.problem-card-shuffling .problem-card-back-one {
+  animation: problem-card-back-one 620ms ease-in-out infinite alternate;
+}
+.problem-card-shuffling .problem-card-back-two {
+  animation: problem-card-back-two 620ms ease-in-out infinite alternate-reverse;
+}
+.problem-card-shuffling .problem-card-back-three {
+  animation: problem-card-back-three 620ms ease-in-out infinite alternate;
+}
+.problem-card-emblem {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.9rem;
+  place-items: center;
+  border: 1px solid color-mix(in oklch, var(--color-primary) 55%, transparent);
+  border-radius: 0.75rem;
+  background-color: color-mix(in oklch, var(--color-primary) 13%, transparent);
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+.problem-card-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.problem-card-eyebrow span {
+  border: 1px solid color-mix(in oklch, var(--color-primary) 34%, transparent);
+  border-radius: 9999px;
+  background-color: color-mix(in oklch, var(--color-primary) 10%, transparent);
+  padding: 0.25rem 0.55rem;
+  letter-spacing: 0.08em;
+}
+.problem-card-title {
+  margin-top: 0.65rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 4vw, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.problem-card-caption {
+  margin-top: 0.75rem;
+  color: var(--color-muted-foreground);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+.problem-card-revealed .problem-card-front {
+  animation: problem-card-reveal 850ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.problem-card-revealed .problem-card-back-one {
+  animation: problem-card-settle-one 650ms ease-out both;
+}
+.problem-card-revealed .problem-card-back-two {
+  animation: problem-card-settle-two 650ms ease-out both;
+}
+.problem-card-revealed .problem-card-back-three {
+  animation: problem-card-settle-three 650ms ease-out both;
+}
+@keyframes problem-card-shuffle {
+  0% { transform: translate(-9px, 3px) rotate(-4deg) scale(0.985); }
+  50% { transform: translate(5px, -5px) rotate(2deg) scale(1.01); }
+  100% { transform: translate(11px, 0) rotate(4deg) scale(0.99); }
+}
+@keyframes problem-card-back-one {
+  from { transform: translate(-3px, -7px) rotate(-3deg); }
+  to { transform: translate(10px, -9px) rotate(5deg); }
+}
+@keyframes problem-card-back-two {
+  from { transform: translate(17px, -15px) rotate(8deg); }
+  to { transform: translate(5px, -20px) rotate(2deg); }
+}
+@keyframes problem-card-back-three {
+  from { transform: translate(12px, -23px) rotate(11deg); }
+  to { transform: translate(24px, -13px) rotate(6deg); }
+}
+@keyframes problem-card-reveal {
+  0% { opacity: 0.55; transform: rotateY(82deg) translateY(8px) scale(0.94); }
+  65% { opacity: 1; transform: rotateY(-8deg) translateY(-3px) scale(1.015); }
+  100% { opacity: 1; transform: rotateY(0) translateY(0) scale(1); }
+}
+@keyframes problem-card-settle-one {
+  to { transform: translate(7px, -6px) rotate(3deg); }
+}
+@keyframes problem-card-settle-two {
+  to { transform: translate(14px, -12px) rotate(6deg); }
+}
+@keyframes problem-card-settle-three {
+  to { transform: translate(20px, -18px) rotate(9deg); }
+}
+
 @keyframes reveal-spin { from { transform: rotateY(0) } to { transform: rotateY(1080deg) } }
 @keyframes rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
 @utility animate-rise { animation: rise 0.6s ease-out both; }
 @utility animate-reveal { animation: reveal-spin 1.8s cubic-bezier(.2,.8,.2,1) both; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .problem-card-shuffling .problem-card { animation: none !important; }
 }
