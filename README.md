@@ -118,7 +118,7 @@ The admin Teams page accepts CSV imports with `teamCode,teamName,member1Name,mem
 6. Enable uploads and configure the deadline, MIME types and size limit in `/admin/settings`.
 7. Test with a small MP4 first, then verify the file's parent folder, exact size/MIME type, final submission record, and Drive link. Test interruption/resume and deadline rejection before the event.
 
-The browser uploads 8 MiB chunks directly to the Google Drive resumable session and reports progress. The app server never accepts or proxies video bytes. OAuth client credentials and refresh tokens are server-only. A live Drive session, Google CORS behavior on the event domain, and large-file resume/finalization remain unverified until real organizer credentials are configured.
+The browser uploads 8 MiB chunks directly to the Google Drive resumable session and reports progress. The app server never accepts or proxies video bytes. Teams must save their AI usage declaration and event-experience feedback before upload and finalization. Once the upload is verified, the app creates or refreshes a branded PDF report in the same team folder with the team and challenge details, AI declaration, feedback, and video metadata. Video duration is read from the selected file and supplemented by Google Drive metadata when available. OAuth client credentials and refresh tokens are server-only. A live Drive session, Google CORS behavior on the event domain, and large-file resume/finalization remain unverified until real organizer credentials are configured.
 
 ## Environment variables
 

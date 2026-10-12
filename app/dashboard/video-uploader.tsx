@@ -9,6 +9,37 @@ const MAX_RETRIES = 3;
 type UploadState = "idle" | "starting" | "uploading" | "finalizing" | "complete";
 type ProbeResult = { offset: number; fileId?: string };
 
+function readVideoDurationMillis(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const video = document.createElement("video");
+    const objectUrl = URL.createObjectURL(file);
+    let settled = false;
+    let timeout = 0;
+    const finish = (duration: number | null) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      video.onloadedmetadata = null;
+      video.onerror = null;
+      video.removeAttribute("src");
+      video.load();
+      URL.revokeObjectURL(objectUrl);
+      resolve(duration);
+    };
+    timeout = window.setTimeout(() => finish(null), 5_000);
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      finish(
+        Number.isFinite(video.duration) && video.duration > 0
+          ? Math.round(video.duration * 1000)
+          : null,
+      );
+    };
+    video.onerror = () => finish(null);
+    video.src = objectUrl;
+  });
+}
+
 function uploadChunk(
   url: string,
   file: File,
@@ -89,6 +120,7 @@ export function VideoUploader({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [confirmationEmailSent, setConfirmationEmailSent] = useState<boolean | null>(null);
+  const [reportFileName, setReportFileName] = useState("");
 
   function chooseFile(event: ChangeEvent<HTMLInputElement>) {
     setFile(event.target.files?.[0] ?? null);
@@ -113,6 +145,7 @@ export function VideoUploader({
     setError("");
     setConfirmationEmailSent(null);
     try {
+      const videoDurationMillis = await readVideoDurationMillis(file);
       const startResponse = await fetch("/api/team/submission/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -184,16 +217,18 @@ export function VideoUploader({
       const finalizeResponse = await fetch("/api/team/submission/finalize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileId }),
+        body: JSON.stringify({ fileId, videoDurationMillis }),
       });
       const finalizeResult = (await finalizeResponse.json()) as {
         ok?: boolean;
         emailSent?: boolean;
+        reportFileName?: string;
         error?: string;
       };
       if (!finalizeResponse.ok || !finalizeResult.ok)
         throw new Error(finalizeResult.error || "Drive upload needs server verification.");
       setConfirmationEmailSent(finalizeResult.emailSent ?? false);
+      setReportFileName(finalizeResult.reportFileName ?? "");
       setState("complete");
       router.refresh();
     } catch (cause) {
@@ -208,7 +243,8 @@ export function VideoUploader({
         className="mt-4 rounded-xl border border-success/40 bg-success/10 p-5 text-sm"
         role="status"
       >
-        Final video submitted.{" "}
+        Final video submitted.
+        {reportFileName ? ` Team report saved to Drive: ${reportFileName}.` : ""}{" "}
         {confirmationEmailSent === false
           ? "The upload is confirmed, but the email confirmation could not be sent."
           : ""}
@@ -256,7 +292,7 @@ export function VideoUploader({
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
             {state === "starting"
-              ? "Starting secure Drive session…"
+              ? "Reading video details and preparing secure Drive upload…"
               : state === "finalizing"
                 ? "Verifying the completed file…"
                 : `Uploading directly to Drive… ${progress}%`}

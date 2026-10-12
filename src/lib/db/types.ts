@@ -73,6 +73,7 @@ export type AiDeclaration = {
   toolIds: string[];
   otherTools?: string[];
   description: string;
+  eventFeedback?: string;
   rulesConfirmed: boolean;
   originalityConfirmed: boolean;
   createdAt: string;

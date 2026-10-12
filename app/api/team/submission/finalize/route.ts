@@ -3,12 +3,17 @@ import { z } from "zod";
 import { getCurrentTeam } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { canStartUpload } from "@/lib/submission-rules";
-import { getFileMeta } from "@/lib/drive.server";
+import { getFileMeta, saveTeamReportPdf } from "@/lib/drive.server";
 import { sendEmail, templates } from "@/lib/email.server";
+import { getProblem } from "@/config/problems";
+import { createSubmissionReportPdf } from "@/lib/submission-report.server";
 
 export const runtime = "nodejs";
 
-const finalizeSchema = z.object({ fileId: z.string().min(1).max(512) });
+const finalizeSchema = z.object({
+  fileId: z.string().min(1).max(512),
+  videoDurationMillis: z.number().int().positive().max(86_400_000).nullable().optional(),
+});
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -42,6 +47,12 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+    if (!declaration?.eventFeedback?.trim()) {
+      return NextResponse.json(
+        { error: "Complete and save the event feedback before finalizing your video." },
+        { status: 403 },
+      );
+    }
 
     const check = canStartUpload({
       settings,
@@ -71,12 +82,52 @@ export async function POST(request: Request) {
       );
     }
 
+    const problem = getProblem(current.team.problemId);
+    if (!problem) {
+      return NextResponse.json(
+        { error: "Your assigned problem statement could not be loaded for the submission report." },
+        { status: 409 },
+      );
+    }
+    const submittedAt = new Date().toISOString();
+    const tools = await repo.listTools(true);
+    const report = await createSubmissionReportPdf({
+      team: {
+        teamCode: current.team.teamCode,
+        teamName: current.team.teamName,
+        member1Name: current.team.member1Name,
+        member2Name: current.team.member2Name,
+        email: current.team.email,
+      },
+      problem,
+      declaration,
+      tools,
+      video: {
+        fileName: file.name,
+        mimeType: file.mimeType,
+        size,
+        ...(file.webViewLink ? { webViewLink: file.webViewLink } : {}),
+        ...(file.videoMediaMetadata?.durationMillis
+          ? { durationMillis: file.videoMediaMetadata.durationMillis }
+          : parsed.data.videoDurationMillis
+            ? { durationMillis: parsed.data.videoDurationMillis }
+            : {}),
+        ...(file.videoMediaMetadata?.width ? { width: file.videoMediaMetadata.width } : {}),
+        ...(file.videoMediaMetadata?.height ? { height: file.videoMediaMetadata.height } : {}),
+      },
+      submittedAt,
+      timeZone: settings.timezone,
+    });
+    const reportName = `${current.team.teamCode}-submission-report.pdf`;
+    const reportFile = await saveTeamReportPdf(submission.driveFolderId, reportName, report);
+
     const finalized = await repo.finalizeSubmission(current.team.id, {
       driveFileId: file.id,
       driveFileName: file.name,
       driveFileSize: size,
       driveWebViewLink: file.webViewLink ?? null,
       mimeType: file.mimeType,
+      uploadCompletedAt: submittedAt,
     });
     if (!finalized)
       return NextResponse.json(
@@ -88,7 +139,7 @@ export async function POST(request: Request) {
       actor: `team:${current.team.teamCode}`,
       action: "submission.finalized",
       teamCode: current.team.teamCode,
-      meta: { fileId: file.id, fileName: file.name, size },
+      meta: { fileId: file.id, fileName: file.name, size, reportFileId: reportFile.id },
     });
 
     let emailSent = false;
@@ -111,7 +162,7 @@ export async function POST(request: Request) {
         error instanceof Error ? error.name : "unknown",
       );
     }
-    return NextResponse.json({ ok: true, emailSent });
+    return NextResponse.json({ ok: true, emailSent, reportFileName: reportFile.name });
   } catch (error) {
     console.error(
       "[submission-finalize] Finalization failed",

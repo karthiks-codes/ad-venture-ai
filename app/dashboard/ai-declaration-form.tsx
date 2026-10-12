@@ -40,6 +40,7 @@ export function AiDeclarationForm({
             .map((tool) => tool.trim())
             .filter(Boolean),
           description: form.get("description"),
+          eventFeedback: form.get("eventFeedback"),
           rulesConfirmed: form.get("rulesConfirmed") === "on",
           originalityConfirmed: form.get("originalityConfirmed") === "on",
         }),
@@ -113,6 +114,22 @@ export function AiDeclarationForm({
           maxLength={2000}
           minLength={20}
           name="description"
+          required
+        />
+      </label>
+      <label className="block text-sm font-semibold" htmlFor="eventFeedback">
+        How was your experience at the event?
+        <span className="mt-1 block text-xs font-normal text-muted-foreground">
+          Required for your team report. Share what you enjoyed or what could be improved.
+        </span>
+        <textarea
+          className="mt-2 min-h-24 w-full rounded-xl border border-input bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          defaultValue={declaration?.eventFeedback ?? ""}
+          id="eventFeedback"
+          maxLength={1000}
+          minLength={10}
+          name="eventFeedback"
+          placeholder="Tell us about your event experience (at least 10 characters)"
           required
         />
       </label>

@@ -126,6 +126,61 @@ export async function ensureTeamFolder(teamCode: string, teamName: string): Prom
   return findOrCreateFolder(`${teamCode} - ${teamName}`.slice(0, 120), subs);
 }
 
+export async function saveTeamReportPdf(
+  folderId: string,
+  fileName: string,
+  contents: Uint8Array,
+): Promise<{ id: string; name: string }> {
+  const escapedName = fileName.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  const params = new URLSearchParams({
+    q: `name='${escapedName}' and '${folderId}' in parents and mimeType='application/pdf' and trashed=false`,
+    fields: "files(id,name)",
+    supportsAllDrives: "true",
+    includeItemsFromAllDrives: "true",
+  });
+  const sharedDriveId = process.env["GOOGLE_DRIVE_SHARED_DRIVE_ID"];
+  if (sharedDriveId) {
+    params.set("corpora", "drive");
+    params.set("driveId", sharedDriveId);
+  }
+  const existing = (await (await api(`/drive/v3/files?${params.toString()}`)).json()) as {
+    files: { id: string; name: string }[];
+  };
+  const file = existing.files[0];
+  if (file) {
+    await api(`/upload/drive/v3/files/${q(file.id)}?uploadType=media&supportsAllDrives=true`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/pdf" },
+      body: Buffer.from(contents),
+    });
+    return file;
+  }
+
+  const boundary = `adv-report-${randomBytes(12).toString("hex")}`;
+  const metadata = JSON.stringify({
+    name: fileName,
+    mimeType: "application/pdf",
+    parents: [folderId],
+  });
+  const body = Buffer.concat([
+    Buffer.from(
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: application/pdf\r\n\r\n`,
+    ),
+    Buffer.from(contents),
+    Buffer.from(`\r\n--${boundary}--`),
+  ]);
+  const created = (await (
+    await api("/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name", {
+      method: "POST",
+      headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
+      body,
+    })
+  ).json()) as { id: string; name: string };
+  if (!created.id || !created.name)
+    throw new Error("Drive did not confirm the team report upload.");
+  return created;
+}
+
 /** Creates a resumable upload session. `origin` makes the session URL CORS-usable from the browser. */
 export async function createResumableSession(args: {
   folderId: string;
@@ -180,7 +235,7 @@ export async function checkResumableSession(
 export async function getFileMeta(fileId: string) {
   return (await (
     await api(
-      `/drive/v3/files/${q(fileId)}?supportsAllDrives=true&fields=id,name,size,mimeType,webViewLink,parents`,
+      `/drive/v3/files/${q(fileId)}?supportsAllDrives=true&fields=id,name,size,mimeType,webViewLink,parents,videoMediaMetadata`,
     )
   ).json()) as {
     id: string;
@@ -189,5 +244,6 @@ export async function getFileMeta(fileId: string) {
     mimeType: string;
     webViewLink?: string;
     parents?: string[];
+    videoMediaMetadata?: { durationMillis?: string; width?: number; height?: number };
   };
 }

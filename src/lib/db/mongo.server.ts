@@ -322,7 +322,7 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
           $set: {
             ...patch,
             status: "submitted",
-            uploadCompletedAt: now(),
+            uploadCompletedAt: patch.uploadCompletedAt ?? now(),
             uploadSessionUrlEncrypted: null,
           },
         },

@@ -225,7 +225,12 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
     async finalizeSubmission(teamId, patch) {
       const s = submissions.get(teamId);
       if (!s || s.status !== "uploading") return null;
-      const n = { ...s, ...patch, status: "submitted" as const, uploadCompletedAt: now() };
+      const n = {
+        ...s,
+        ...patch,
+        status: "submitted" as const,
+        uploadCompletedAt: patch.uploadCompletedAt ?? now(),
+      };
       submissions.set(teamId, n);
       return n;
     },

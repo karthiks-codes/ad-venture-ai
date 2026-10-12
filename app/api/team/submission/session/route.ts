@@ -49,6 +49,12 @@ export async function POST(request: Request) {
       repo.getSettings(),
       repo.getDeclaration(teamId),
     ]);
+    if (!declaration?.eventFeedback?.trim()) {
+      return NextResponse.json(
+        { error: "Complete and save the event feedback in your AI declaration before uploading." },
+        { status: 403 },
+      );
+    }
     const existing = await repo.getSubmission(teamId);
     const expectedFileName = `final-video.${extensionByMimeType[parsed.data.mimeType] || "mp4"}`;
     if (existing?.status === "submitted")

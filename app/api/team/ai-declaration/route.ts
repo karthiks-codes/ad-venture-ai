@@ -10,6 +10,7 @@ const declarationSchema = z
     toolIds: z.array(z.string().min(1).max(100)).max(30),
     otherTools: z.array(z.string().trim().min(1).max(100)).max(30).default([]),
     description: z.string().trim().min(20).max(2000),
+    eventFeedback: z.string().trim().min(10).max(1000),
     rulesConfirmed: z.literal(true),
     originalityConfirmed: z.literal(true),
   })
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Select a sample tool or list another tool you used, describe its contribution, and confirm both acknowledgements.",
+          "Select a sample tool or list another tool you used, describe its contribution, share at least 10 characters of event feedback, and confirm both acknowledgements.",
       },
       { status: 400 },
     );
