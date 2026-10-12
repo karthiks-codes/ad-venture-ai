@@ -33,7 +33,7 @@ export default function HomePage() {
               </li>
               <li className="flex items-center gap-2">
                 <UsersRound aria-hidden="true" className="h-4 w-4 text-primary" />
-                Teams of {EVENT.teamSize}
+                Team of {EVENT.teamSize}
               </li>
             </ul>
             <p className="mt-6 max-w-md text-muted-foreground">

@@ -8,7 +8,7 @@ export const EVENT = {
   umbrella: "Innovation Day",
   dateLabel: "13 October 2026 · Tuesday",
   timeLabel: "1:30 PM – 4:00 PM IST",
-  venue: "PB-G3, G4",
+  venue: "PB-G2, G3",
   teamSize: 2,
 } as const;
 
