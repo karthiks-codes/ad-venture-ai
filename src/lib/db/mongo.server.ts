@@ -450,15 +450,9 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
       ).insertOne({ _id: crypto.randomUUID(), at: now(), ...e });
     },
     async listLogs(limit) {
-      return (
-        await (
-          await col<Omit<AuditLog, "id">>("auditLogs")
-        )
-          .find()
-          .sort({ at: -1 })
-          .limit(limit)
-          .toArray()
-      ).map((d) => strip<AuditLog>(d)!);
+      const cursor = (await col<Omit<AuditLog, "id">>("auditLogs")).find().sort({ at: -1 });
+      if (limit > 0) cursor.limit(limit);
+      return (await cursor.toArray()).map((d) => strip<AuditLog>(d)!);
     },
 
     async saveResetToken(t) {

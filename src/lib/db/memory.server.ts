@@ -302,7 +302,7 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
       if (logs.length > 500) logs.pop();
     },
     async listLogs(limit) {
-      return logs.slice(0, limit);
+      return limit > 0 ? logs.slice(0, limit) : [...logs];
     },
     async saveResetToken(t) {
       tokens.set(t.tokenHash, { ...t });

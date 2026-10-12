@@ -151,6 +151,7 @@ export interface Repo {
   recordAdminLogin(email: string, googleSub: string, name: string | null): Promise<Admin | null>;
 
   log(entry: Omit<AuditLog, "id" | "at">): Promise<void>;
+  /** Returns the newest `limit` logs, or all logs when `limit` is zero. */
   listLogs(limit: number): Promise<AuditLog[]>;
 
   saveResetToken(t: ResetToken): Promise<void>;

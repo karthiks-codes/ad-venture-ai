@@ -29,6 +29,15 @@ describe("repository selection", () => {
 });
 
 describe("memory repository behavior in explicitly selected demo mode", () => {
+  it("returns all audit events when the log limit is zero", async () => {
+    const repo = createMemoryRepo({ seed: false });
+    await repo.log({ actor: "admin:test", action: "admin.login" });
+    await repo.log({ actor: "team:ADV-001", action: "team.login" });
+
+    expect(await repo.listLogs(0)).toHaveLength(2);
+    expect(await repo.listLogs(1)).toHaveLength(1);
+  });
+
   it("normalizes team code and email and rejects duplicates", async () => {
     const repo = createMemoryRepo({ seed: false });
     const team = await repo.createTeam({

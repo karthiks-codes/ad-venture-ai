@@ -70,6 +70,9 @@ export default async function TeamToolkitPage() {
           The organizer has not enabled any tools yet.
         </p>
       )}
+      <p className="panel mt-10 max-w-3xl p-5 text-sm text-muted-foreground">
+        Feel free to contact any of the coordinators for help with the event or any of the tools.
+      </p>
     </main>
   );
 }

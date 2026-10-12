@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getRepo } from "@/lib/db/index.server";
 import type { AiTool } from "@/lib/db/types";
 import { SiteHeader } from "../_components/site-header";
@@ -88,12 +87,9 @@ export default async function AiToolsPage() {
             )}
           </>
         )}
-        <Link
-          className="mt-10 inline-flex rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground"
-          href="/login"
-        >
-          Open your team toolkit
-        </Link>
+        <p className="panel mt-10 max-w-3xl p-5 text-sm text-muted-foreground">
+          Feel free to contact any of the coordinators for help with the event or any of the tools.
+        </p>
       </section>
     </main>
   );

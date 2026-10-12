@@ -4,21 +4,23 @@ import { getRepo } from "@/lib/db/index.server";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const admin = await getCurrentAdmin();
     if (!admin) {
       return NextResponse.json({ error: "Administrator sign-in required." }, { status: 401 });
     }
-    const logs = await getRepo().listLogs(8);
+    const showAll = new URL(request.url).searchParams.get("all") === "true";
+    const logs = await getRepo().listLogs(showAll ? 0 : 8);
     return NextResponse.json(
       {
-        logs: logs.map(({ id, at, actor, action, teamCode }) => ({
+        logs: logs.map(({ id, at, actor, action, teamCode, meta }) => ({
           id,
           at,
           actor,
           action,
           teamCode,
+          meta,
         })),
       },
       { headers: { "Cache-Control": "no-store, max-age=0" } },

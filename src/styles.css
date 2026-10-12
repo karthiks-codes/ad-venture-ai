@@ -112,6 +112,19 @@
   }
   h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
   :focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+  button {
+    border: 1px solid color-mix(in oklch, var(--color-primary) 30%, var(--color-border));
+    background-color: color-mix(in oklch, var(--color-primary) 8%, var(--color-card));
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease,
+      filter 150ms ease,
+      box-shadow 150ms ease;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 @utility text-gradient {
@@ -137,6 +150,14 @@
 @utility glow-border {
   border: 1px solid color-mix(in oklch, var(--color-primary) 40%, transparent);
   box-shadow: var(--glow);
+}
+
+button {
+  border-radius: 9999px;
+}
+button:not(:disabled):hover {
+  filter: brightness(1.12);
+  box-shadow: 0 3px 14px color-mix(in oklch, var(--color-primary) 20%, transparent);
 }
 
 @keyframes reveal-spin { from { transform: rotateY(0) } to { transform: rotateY(1080deg) } }
