@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export function ProblemVisualCues({ images }: { images?: string[] }) {
+export function ProblemVisualCues({ images }: { images: string[] | undefined }) {
   if (!images?.length) return null;
 
   return (
