@@ -58,13 +58,9 @@ export default async function ChallengePage() {
           Your assigned brief · {problem.code}
         </p>
         <h1 className="mt-3 text-4xl font-bold">{problem.title}</h1>
-        <p className="mt-3 text-xl text-accent">{problem.hook}</p>
+        <p className="mt-3 text-xl text-accent">{problem.summary}</p>
         <p className="mt-6 leading-relaxed text-muted-foreground">{problem.description}</p>
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
-          <div>
-            <h2 className="font-bold">Advertising mission</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{problem.objective}</p>
-          </div>
           <div>
             <h2 className="font-bold">Target audience</h2>
             <p className="mt-2 text-sm text-muted-foreground">{problem.targetAudience}</p>
@@ -73,26 +69,10 @@ export default async function ChallengePage() {
             <h2 className="font-bold">Unique selling proposition</h2>
             <p className="mt-2 text-sm text-muted-foreground">{problem.sellingProposition}</p>
           </div>
-          <div>
-            <h2 className="font-bold">Recommended duration</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{problem.duration}</p>
-          </div>
         </div>
         <div className="mt-8">
-          <h2 className="font-bold">Required elements and constraints</h2>
-          <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-muted-foreground">
-            {problem.constraints.map((constraint) => (
-              <li key={constraint}>{constraint}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-8">
-          <h2 className="font-bold">Creative angles to explore</h2>
-          <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-muted-foreground">
-            {problem.angles.map((angle) => (
-              <li key={angle}>{angle}</li>
-            ))}
-          </ul>
+          <h2 className="font-bold">Visual reference guidance</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{problem.visualReference}</p>
         </div>
         <Link
           className="mt-8 inline-flex rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground"

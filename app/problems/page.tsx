@@ -25,7 +25,7 @@ export default function ProblemsPage() {
             >
               <span className="text-xs font-bold tracking-widest text-primary">{problem.code}</span>
               <h2 className="mt-3 text-xl font-bold">{problem.title}</h2>
-              <p className="mt-2 text-sm font-semibold text-accent">{problem.hook}</p>
+              <p className="mt-2 text-sm font-semibold text-accent">{problem.summary}</p>
               <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">
                 {problem.description}
               </p>

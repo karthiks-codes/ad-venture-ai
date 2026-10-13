@@ -231,9 +231,10 @@ export async function createSubmissionReportPdf(data: SubmissionReportData): Pro
 
   section("Assigned problem statement");
   paragraph("Challenge", `${data.problem.code} - ${data.problem.title}`);
-  paragraph("Creative hook", data.problem.hook);
+  paragraph("Product summary", data.problem.summary);
   paragraph("Challenge brief", data.problem.description);
-  paragraph("Advertising mission", data.problem.objective);
+  paragraph("Unique selling proposition", data.problem.sellingProposition);
+  paragraph("Visual reference guidance", data.problem.visualReference);
 
   section("AI usage declaration");
   const toolsById = new Map(data.tools.map((tool) => [tool.id, tool]));

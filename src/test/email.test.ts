@@ -42,15 +42,16 @@ describe("Gmail API MIME messages", () => {
     expect(email.text).toContain("ADV-030=temporary-password");
     expect(email.text).toContain("Team code: ADV-030");
     expect(email.text).toContain("Temporary password: temporary-password");
-    expect(email.text).toContain("Copy this complete line and paste it into the Team code field");
-    expect(email.text).toContain("one-time link, expires in 30 minutes");
+    expect(email.text).toContain("paste this line into the Team code field");
+    expect(email.text).toContain("one-time link (expires in 120 minutes)");
+    expect(email.html).toContain("(expires in 2 hours).");
     expect(email.text.indexOf("ADV-030=temporary-password")).toBeLessThan(
-      email.text.indexOf("Enter to login"),
+      email.text.indexOf("You will be asked to change this temporary password"),
     );
     expect(email.html).toContain('href="https://adventure.example/login#access=single-use-token"');
     expect(email.html).toContain("<code>ADV-030=temporary-password</code>");
     expect(email.html.indexOf("<code>ADV-030=temporary-password</code>")).toBeLessThan(
-      email.html.indexOf(">Enter to login</a>"),
+      email.html.indexOf("You will be asked to change this temporary password"),
     );
     expect(email.html).toContain("https://adventure.example/login");
   });
@@ -70,11 +71,15 @@ describe("Gmail API MIME messages", () => {
     expect(token).toBeTruthy();
 
     const tokenHash = sha256(token!);
-    expect(await repo.getTeamLoginToken(tokenHash)).toMatchObject({
+    const savedToken = await repo.getTeamLoginToken(tokenHash);
+    expect(savedToken).toMatchObject({
       teamId: "team-1",
       authVersion: 2,
       usedAt: null,
     });
+    const expiryWindow = new Date(savedToken!.expiresAt).getTime() - Date.now();
+    expect(expiryWindow).toBeGreaterThan(119 * 60_000);
+    expect(expiryWindow).toBeLessThanOrEqual(120 * 60_000);
     expect(await repo.consumeTeamLoginToken(tokenHash)).toMatchObject({ teamId: "team-1" });
     expect(await repo.consumeTeamLoginToken(tokenHash)).toBeNull();
   });

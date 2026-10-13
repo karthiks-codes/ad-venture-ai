@@ -23,7 +23,7 @@ export default async function AdminProblemsPage() {
               {problem.code} · {counts[problem.id] ?? 0} / {problem.capacity} teams
             </p>
             <h2 className="mt-2 text-xl font-bold">{problem.title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{problem.objective}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{problem.sellingProposition}</p>
           </article>
         ))}
       </div>
