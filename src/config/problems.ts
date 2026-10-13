@@ -12,6 +12,7 @@ export type ProblemStatement = {
   targetAudience: string;
   sellingProposition: string;
   features?: string[];
+  visualCues?: string[];
   toolCategories: string[];
   capacity: number;
   archived?: boolean;
@@ -39,6 +40,7 @@ export const PROBLEMS: ProblemStatement[] = [
       "Reusable or single-use product direction",
       "Material and end-of-life claims tied to the final specification",
     ],
+    visualCues: ["/assets/problem-cues/husk-cup-01.png", "/assets/problem-cues/husk-cup-02.png"],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
   },
@@ -58,6 +60,10 @@ export const PROBLEMS: ProblemStatement[] = [
       "Dedicated laptop compartment",
       "Integrated solar panel for supplemental charging",
       "USB charging ports connected to a power bank",
+    ],
+    visualCues: [
+      "/assets/problem-cues/solar-backpack-01.png",
+      "/assets/problem-cues/solar-backpack-02.png",
     ],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
@@ -80,6 +86,10 @@ export const PROBLEMS: ProblemStatement[] = [
       "One-touch, two-minute sterilization cycle",
       "Optional companion app",
     ],
+    visualCues: [
+      "/assets/problem-cues/smart-bottle-01.png",
+      "/assets/problem-cues/smart-bottle-02.png",
+    ],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
   },
@@ -100,6 +110,10 @@ export const PROBLEMS: ProblemStatement[] = [
       "Loud emergency alarm",
       "Optional smartphone-connected location sharing",
     ],
+    visualCues: [
+      "/assets/problem-cues/personal-safety-01.png",
+      "/assets/problem-cues/personal-safety-02.png",
+    ],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
   },
@@ -119,6 +133,10 @@ export const PROBLEMS: ProblemStatement[] = [
       "Plant-based protein",
       "Familiar recipe ingredients such as dates, oats, and nuts",
       "Portable snack format",
+    ],
+    visualCues: [
+      "/assets/problem-cues/protein-bar-01.png",
+      "/assets/problem-cues/protein-bar-02.png",
     ],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
@@ -141,6 +159,7 @@ export const PROBLEMS: ProblemStatement[] = [
       "Practical comfort for regular wear",
       "Familiar wearable design with modern styling",
     ],
+    visualCues: ["/assets/problem-cues/sneakers-01.png", "/assets/problem-cues/sneakers-02.png"],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
   },
@@ -161,6 +180,7 @@ export const PROBLEMS: ProblemStatement[] = [
       "Wearable keepsake or gift use",
       "Optional neutral gift box",
     ],
+    visualCues: ["/assets/problem-cues/jewelry-01.png", "/assets/problem-cues/jewelry-02.png"],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
   },
@@ -181,6 +201,7 @@ export const PROBLEMS: ProblemStatement[] = [
       "Decorative hinged lid",
       "Compact physical keepsake format",
     ],
+    visualCues: ["/assets/problem-cues/music-box-01.png", "/assets/problem-cues/music-box-02.png"],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
   },

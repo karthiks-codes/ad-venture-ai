@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProblem } from "@/config/problems";
+import { ProblemVisualCues } from "../../_components/problem-visual-cues";
 import { SiteHeader } from "../../_components/site-header";
 
 export default async function ProblemDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,6 +27,7 @@ export default async function ProblemDetailPage({ params }: { params: Promise<{ 
           <h1 className="mt-3 text-4xl font-bold">{problem.title}</h1>
           <p className="mt-3 text-xl text-accent">{problem.summary}</p>
           <p className="mt-6 leading-relaxed text-muted-foreground">{problem.description}</p>
+          <ProblemVisualCues images={problem.visualCues} />
           <div className="mt-8 grid gap-6 sm:grid-cols-2">
             <section>
               <h2 className="font-bold">Target audience</h2>
