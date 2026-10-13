@@ -17,7 +17,6 @@ export type Team = {
   assignedAt: string | null;
   assignedBy: "draw" | "admin" | null;
   submissionStatus: SubmissionStatus;
-  toolkitViewedAt: string | null;
   challengeViewedAt: string | null;
   isDemo?: boolean;
   createdAt: string;

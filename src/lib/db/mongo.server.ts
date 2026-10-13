@@ -166,7 +166,6 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
         assignedAt: null,
         assignedBy: null,
         submissionStatus: "none",
-        toolkitViewedAt: null,
         challengeViewedAt: null,
         isDemo: t.isDemo ?? false,
         createdAt: ts,
