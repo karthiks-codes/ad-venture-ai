@@ -68,16 +68,16 @@ export const PROBLEMS: ProblemStatement[] = [
     code: "P-03",
     title: "HydroHalo — Sustainable Smart Water Bottle",
     summary:
-      "A reusable stainless-steel bottle with hydration reminders and a temperature display.",
+      "A reusable stainless-steel bottle with hydration reminders and one-touch, two-minute sterilization.",
     description:
-      "HydroHalo is a reusable stainless-steel water bottle for people who want durable drinkware and a simple way to remember to hydrate. It features hydration reminders and an at-a-glance temperature display, with a companion application available as an optional extension. The durable metal construction and built-in prompts distinguish it from ordinary reusable bottles without relying on unsupported health claims.",
+      "HydroHalo is a reusable stainless-steel water bottle for people who want durable drinkware and a simple way to remember to hydrate. Along with hydration reminders, it offers a one-touch sterilization cycle designed to run for two minutes. A companion application is available as an optional extension. The durable metal construction and built-in prompts distinguish it from ordinary reusable bottles without relying on unsupported health claims.",
     targetAudience: "People who want durable reusable drinkware and hydration reminders.",
     sellingProposition:
-      "Pairs a reusable metal bottle with simple hydration prompts and at-a-glance temperature information.",
+      "Pairs reusable metal drinkware and hydration prompts with a convenient one-touch, two-minute sterilization cycle.",
     features: [
       "Reusable stainless-steel construction",
       "Hydration reminders",
-      "At-a-glance temperature display",
+      "One-touch, two-minute sterilization cycle",
       "Optional companion app",
     ],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
