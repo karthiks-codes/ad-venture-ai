@@ -139,7 +139,7 @@ export const PROBLEMS: ProblemStatement[] = [
       "Contemporary everyday sneaker silhouette",
       "Recycled materials used in part",
       "Practical comfort for regular wear",
-      "Material content described without unsupported percentages",
+      "Familiar wearable design with modern styling",
     ],
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
