@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { PROBLEMS } from "@/config/problems";
+import { assignmentCount } from "@/lib/allocation";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 
@@ -28,7 +29,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   const parsed = assignmentSchema.safeParse(body);
   if (!parsed.success)
     return NextResponse.json({ error: "Confirm a valid problem reassignment." }, { status: 400 });
-  const target = PROBLEMS.find((problem) => problem.id === parsed.data.problemId);
+  const target = PROBLEMS.find(
+    (problem) =>
+      problem.id === parsed.data.problemId || problem.assignmentId === parsed.data.problemId,
+  );
   if (!target)
     return NextResponse.json({ error: "Problem statement was not found." }, { status: 404 });
 
@@ -39,7 +43,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     if (!team) return NextResponse.json({ error: "Team account was not found." }, { status: 404 });
     const updated = await repo.assignProblemAtomic(
       id,
-      (counts) => ((counts[target.id] ?? 0) < target.capacity ? target.id : null),
+      (counts) =>
+        assignmentCount(target, counts) < target.capacity
+          ? (target.assignmentId ?? target.id)
+          : null,
       "admin",
       true,
     );

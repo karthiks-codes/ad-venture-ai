@@ -234,7 +234,17 @@ export async function createSubmissionReportPdf(data: SubmissionReportData): Pro
   paragraph("Product summary", data.problem.summary);
   paragraph("Challenge brief", data.problem.description);
   paragraph("Unique selling proposition", data.problem.sellingProposition);
-  paragraph("Visual reference guidance", data.problem.visualReference);
+  if (data.problem.features?.length) {
+    paragraph("Product features", data.problem.features.join("; "));
+  }
+  if (data.problem.objective) paragraph("Campaign objective", data.problem.objective);
+  if (data.problem.duration) paragraph("Suggested duration", data.problem.duration);
+  if (data.problem.constraints?.length) {
+    paragraph("Brief constraints", data.problem.constraints.join("; "));
+  }
+  if (data.problem.angles?.length) {
+    paragraph("Suggested creative angles", data.problem.angles.join("; "));
+  }
 
   section("AI usage declaration");
   const toolsById = new Map(data.tools.map((tool) => [tool.id, tool]));

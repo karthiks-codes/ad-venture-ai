@@ -30,7 +30,7 @@ export const DEMO_TEAMS = [
     member2Name: "Pooja V",
     email: "adv003@teams.adventure.test",
     mustChangePassword: false,
-    problemId: "eco-shoes",
+    problemId: "adventure-2026-v2-p06",
     submissionStatus: "none",
   },
   {
@@ -40,7 +40,7 @@ export const DEMO_TEAMS = [
     member2Name: "Lasya T",
     email: "adv004@teams.adventure.test",
     mustChangePassword: false,
-    problemId: "rice-husk-cups",
+    problemId: "adventure-2026-v2-p01",
     submissionStatus: "submitted",
   },
   {
@@ -50,7 +50,7 @@ export const DEMO_TEAMS = [
     member2Name: "Bhavya G",
     email: "adv005@teams.adventure.test",
     mustChangePassword: false,
-    problemId: "smart-bottle",
+    problemId: "adventure-2026-v2-p03",
     submissionStatus: "none",
   },
   {

@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
-import { getProblem } from "@/config/problems";
-import { PROBLEMS } from "@/config/problems";
+import { getProblem, isLegacyProblem, PROBLEMS } from "@/config/problems";
 import { AdminShell } from "../_components/admin-shell";
 import { CreateTeamForm } from "./create-team-form";
 import { ImportTeamsForm } from "./import-teams-form";
@@ -244,7 +243,12 @@ export default async function AdminTeamsPage({
                     {team.firstLoginAt ? "First login complete" : "First login pending"}
                   </span>
                 </td>
-                <td className="px-4 py-3">{getProblem(team.problemId)?.title ?? "Unassigned"}</td>
+                <td className="px-4 py-3">
+                  {getProblem(team.problemId)?.title ?? "Unassigned"}
+                  {isLegacyProblem(team.problemId) && (
+                    <div className="text-xs text-muted-foreground">Previous brief</div>
+                  )}
+                </td>
                 <td className="px-4 py-3">{team.submissionStatus}</td>
                 <td className="px-4 py-3">
                   <TeamActions
@@ -252,6 +256,7 @@ export default async function AdminTeamsPage({
                     teamCode={team.teamCode}
                     status={team.status}
                     problemId={team.problemId}
+                    assignedProblem={getProblem(team.problemId)}
                     problems={PROBLEMS}
                     readOnly={admin.role === "viewer"}
                   />

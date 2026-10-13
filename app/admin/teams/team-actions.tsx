@@ -9,6 +9,7 @@ export function TeamActions({
   teamCode,
   status,
   problemId,
+  assignedProblem,
   problems,
   readOnly,
 }: {
@@ -16,6 +17,7 @@ export function TeamActions({
   teamCode: string;
   status: "active" | "inactive";
   problemId: string | null;
+  assignedProblem: ProblemStatement | null;
   problems: ProblemStatement[];
   readOnly: boolean;
 }) {
@@ -23,6 +25,9 @@ export function TeamActions({
   const [problem, setProblem] = useState(problemId ?? "");
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const assignedProblemIsListed = problems.some(
+    (item) => (item.assignmentId ?? item.id) === problemId,
+  );
 
   async function request(path: string, method: string, body?: object) {
     setPending(true);
@@ -81,8 +86,14 @@ export function TeamActions({
           value={problem}
         >
           <option value="">Unassigned</option>
+          {assignedProblem && !assignedProblemIsListed && (
+            <option value={problemId ?? ""}>
+              {assignedProblem.code} · {assignedProblem.title}
+              {assignedProblem.archived ? " (previous brief)" : " (existing assignment)"}
+            </option>
+          )}
           {problems.map((item) => (
-            <option key={item.id} value={item.id}>
+            <option key={item.assignmentId ?? item.id} value={item.assignmentId ?? item.id}>
               {item.code} · {item.title}
             </option>
           ))}

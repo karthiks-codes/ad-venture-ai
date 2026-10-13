@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PROBLEMS } from "@/config/problems";
+import { assignmentCount } from "@/lib/allocation";
 import { getCurrentAdmin } from "@/lib/auth.server";
 import { getRepo } from "@/lib/db/index.server";
 import { AdminShell } from "./_components/admin-shell";
@@ -50,7 +51,7 @@ export default async function AdminOverviewPage() {
                   {problem.code} · {problem.title}
                 </span>
                 <span className="font-bold">
-                  {counts[problem.id] ?? 0} / {problem.capacity}
+                  {assignmentCount(problem, counts)} / {problem.capacity}
                 </span>
               </li>
             ))}

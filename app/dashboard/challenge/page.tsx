@@ -54,6 +54,12 @@ export default async function ChallengePage() {
         ← Team workspace
       </Link>
       <section className="panel mt-6 p-7 sm:p-9">
+        {problem.archived && (
+          <div className="rounded-xl border border-accent/30 bg-accent/10 p-4 text-sm">
+            This is your team’s original assigned brief. It has been kept available while the
+            current problem set is updated.
+          </div>
+        )}
         <p className="text-sm font-bold uppercase tracking-widest text-primary">
           Your assigned brief · {problem.code}
         </p>
@@ -70,10 +76,54 @@ export default async function ChallengePage() {
             <p className="mt-2 text-sm text-muted-foreground">{problem.sellingProposition}</p>
           </div>
         </div>
-        <div className="mt-8">
-          <h2 className="font-bold">Visual reference guidance</h2>
-          <p className="mt-2 text-sm text-muted-foreground">{problem.visualReference}</p>
-        </div>
+        {problem.features?.length ? (
+          <div className="mt-8">
+            <h2 className="font-bold">Product features</h2>
+            <ul className="mt-2 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+              {problem.features.map((feature) => (
+                <li className="rounded-lg bg-muted/50 p-3" key={feature}>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {(problem.objective || problem.duration) && (
+          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            {problem.objective && (
+              <div>
+                <h2 className="font-bold">Campaign objective</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{problem.objective}</p>
+              </div>
+            )}
+            {problem.duration && (
+              <div>
+                <h2 className="font-bold">Suggested duration</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{problem.duration}</p>
+              </div>
+            )}
+          </div>
+        )}
+        {problem.constraints && (
+          <div className="mt-8">
+            <h2 className="font-bold">Brief constraints</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              {problem.constraints.map((constraint) => (
+                <li key={constraint}>{constraint}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {problem.angles && (
+          <div className="mt-8">
+            <h2 className="font-bold">Suggested creative angles</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+              {problem.angles.map((angle) => (
+                <li key={angle}>{angle}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <Link
           className="mt-8 inline-flex rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground"
           href="/dashboard/ai-toolkit"
