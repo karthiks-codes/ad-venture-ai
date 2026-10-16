@@ -55,12 +55,12 @@ export async function POST(request: NextRequest) {
         { status: 429 },
       );
     }
-    const admins = (await repo.listAdmins()).filter(
-      (admin) => admin.status === "active" && admin.role !== "viewer",
+    const owner = (await repo.listAdmins()).find(
+      (admin) => admin.status === "active" && admin.role === "owner",
     );
-    if (admins.length === 0) {
+    if (!owner) {
       return NextResponse.json(
-        { error: "No demo contact is available right now." },
+        { error: "The platform owner is not configured to receive demo requests." },
         { status: 503 },
       );
     }
@@ -68,16 +68,10 @@ export async function POST(request: NextRequest) {
       ...parsed.data,
       email: parsed.data.email.toLowerCase(),
     });
-    const deliveries = await Promise.allSettled(
-      admins.map((admin) => sendEmail(repo, admin.email, mail)),
-    );
-    if (!deliveries.some((result) => result.status === "fulfilled")) {
-      throw new Error("No admin request email was delivered.");
-    }
+    await sendEmail(repo, owner.email, mail);
     return NextResponse.json({
       ok: true,
-      message:
-        "Your request was sent to the platform administrators. It does not grant admin access.",
+      message: "Your request was sent to the platform owner. It does not grant admin access.",
     });
   } catch (error) {
     console.error(

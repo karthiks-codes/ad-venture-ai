@@ -96,7 +96,7 @@ export function AdminDemoRequestForm() {
         {pending ? "Sending request…" : "Request an admin demo"}
       </button>
       <p className="text-xs text-muted-foreground">
-        This sends a request to the platform administrators. It does not grant admin access.
+        This sends a request to the platform owner. It does not grant admin access.
       </p>
     </form>
   );

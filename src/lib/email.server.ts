@@ -7,7 +7,13 @@ import { randomToken, sha256 } from "@/lib/session.server";
 
 const TEAM_LOGIN_TOKEN_TTL_MS = 2 * 60 * 60_000;
 
-export type Mail = { to: string; subject: string; html: string; text: string };
+export type Mail = {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  replyTo?: string;
+};
 interface EmailProvider {
   name: string;
   send(message: Mail): Promise<{ ok: boolean; id?: string; error?: string }>;
@@ -46,9 +52,14 @@ export function createGmailRawMessage(
   if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(safeTo)) {
     throw new Error("Recipient email address is invalid.");
   }
+  const safeReplyTo = message.replyTo?.replace(/[\r\n]+/g, "").trim();
+  if (safeReplyTo && !/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(safeReplyTo)) {
+    throw new Error("Reply-to email address is invalid.");
+  }
   const content = [
     `From: ADventure 2026 <${from}>`,
     `To: ${safeTo}`,
+    ...(safeReplyTo ? [`Reply-To: ${safeReplyTo}`] : []),
     `Subject: ${encodeHeader(message.subject)}`,
     "MIME-Version: 1.0",
     `Content-Type: multipart/alternative; boundary="${boundary}"`,
@@ -190,6 +201,7 @@ export const templates = {
   }),
   adminDemoRequest: (p: { name: string; email: string; message: string }): Omit<Mail, "to"> => ({
     subject: "ADventure admin demo request",
+    replyTo: p.email,
     text: `A visitor requested an admin demo.\n\nName: ${p.name}\nEmail: ${p.email}\nWhat they want to see: ${p.message}\n\nThis request does not grant admin access. Reply directly if you want to arrange a walkthrough.`,
     html: `<!doctype html><html><body style="margin:0;background:#0b1024;font-family:Arial,sans-serif;color:#eef2ff"><div style="max-width:560px;margin:0 auto;padding:32px 24px"><div style="font-size:22px;font-weight:800;letter-spacing:-.5px;color:#5ee0ff">ADventure</div><h1 style="font-size:20px;margin:24px 0 16px">Admin demo request</h1><p><b>Name:</b> ${escapeHtml(p.name)}</p><p><b>Email:</b> ${escapeHtml(p.email)}</p><p><b>What they want to see:</b><br>${escapeHtml(p.message)}</p><p>This request does not grant admin access. Reply directly if you want to arrange a walkthrough.</p></div></body></html>`,
   }),

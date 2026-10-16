@@ -14,8 +14,8 @@ export default function DemoAccessPage() {
         </p>
         <h1 className="mt-3 text-4xl font-bold">Request a demo</h1>
         <p className="mt-3 max-w-3xl text-muted-foreground">
-          Try the participant workspace with an email sign-in link, or ask the platform
-          administrators for a guided look at the admin experience.
+          Try the participant workspace with an email sign-in link, or ask the platform owner for a
+          guided look at the admin experience.
         </p>
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <section className="panel p-6 sm:p-8">
@@ -29,7 +29,7 @@ export default function DemoAccessPage() {
           <section className="panel p-6 sm:p-8">
             <h2 className="text-2xl font-bold">Admin experience</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Send the administrators a request to arrange a guided demo of the admin experience.
+              Send the platform owner a request to arrange a guided demo of the admin experience.
             </p>
             <AdminDemoRequestForm />
           </section>
