@@ -4,7 +4,7 @@ import "../src/styles.css";
 
 export const metadata: Metadata = {
   title: "ADventure 2026 — One Product. Endless Possibilities.",
-  description: "The AI-powered advertising competition at BVRIT Hyderabad Innovation Day.",
+  description: "An open creative challenge: draw a product, create an AI-powered ad and submit it.",
   openGraph: {
     title: "ADventure 2026 — AI Ad Competition",
     description: "Draw a product, create an AI-powered ad and submit it on 13 October 2026.",

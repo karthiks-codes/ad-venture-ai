@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
     if (
       !availableTeam ||
       availableTeam.status !== "active" ||
-      (availableTeam.authVersion ?? 0) !== availableToken.authVersion
+      (availableTeam.authVersion ?? 0) !== availableToken.authVersion ||
+      (availableTeam.temporaryDemoExpiresAt &&
+        Date.parse(availableTeam.temporaryDemoExpiresAt) <= Date.now())
     ) {
       return NextResponse.json(
         { error: "This sign-in link is invalid or expired." },
@@ -78,12 +80,27 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date().toISOString();
-    await repo.updateTeam(team.id, {
-      firstLoginAt: team.firstLoginAt ?? now,
-      lastLoginAt: now,
-    });
-    await repo.log({ actor: `team:${team.teamCode}`, action: "team.magic_login" });
-    await setSession({ role: "team", teamId: team.id, authVersion: team.authVersion ?? 0 });
+    const remainingMs = team.temporaryDemoExpiresAt
+      ? Date.parse(team.temporaryDemoExpiresAt) - Date.now()
+      : null;
+    if (remainingMs !== null && remainingMs <= 0) {
+      return NextResponse.json(
+        { error: "This sign-in link is invalid or expired." },
+        { status: 400 },
+      );
+    }
+    if (remainingMs === null) {
+      await repo.updateTeam(team.id, {
+        firstLoginAt: team.firstLoginAt ?? now,
+        lastLoginAt: now,
+      });
+      await repo.log({ actor: `team:${team.teamCode}`, action: "team.magic_login" });
+    }
+    const sessionHours = remainingMs === null ? 10 : Math.min(2, remainingMs / 3_600_000);
+    await setSession(
+      { role: "team", teamId: team.id, authVersion: team.authVersion ?? 0 },
+      sessionHours,
+    );
 
     return NextResponse.json({ ok: true, mustChangePassword: team.mustChangePassword });
   } catch (error) {

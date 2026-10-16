@@ -4,6 +4,7 @@ import { ThemeToggle } from "./theme-toggle";
 const links = [
   { href: "/rules", label: "Rules" },
   { href: "/problems", label: "Challenges" },
+  { href: "/demo", label: "Try a demo" },
 ];
 
 export function SiteHeader() {

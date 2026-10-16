@@ -107,7 +107,9 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
   const counts = () => {
     const c: Record<string, number> = {};
     teams.forEach((t) => {
-      if (t.problemId) c[t.problemId] = (c[t.problemId] ?? 0) + 1;
+      if (t.problemId && !t.temporaryDemoExpiresAt) {
+        c[t.problemId] = (c[t.problemId] ?? 0) + 1;
+      }
     });
     return c;
   };
@@ -121,7 +123,17 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
       return [...teams.values()].sort((a, b) => a.teamCode.localeCompare(b.teamCode));
     },
     async getTeam(id) {
-      return teams.get(id) ?? null;
+      const team = teams.get(id);
+      if (team?.temporaryDemoExpiresAt && Date.parse(team.temporaryDemoExpiresAt) <= Date.now()) {
+        teams.delete(id);
+        submissions.delete(id);
+        declarations.delete(id);
+        for (const [hash, token] of teamLoginTokens) {
+          if (token.teamId === id) teamLoginTokens.delete(hash);
+        }
+        return null;
+      }
+      return team ?? null;
     },
     async findTeamByLogin(identifier) {
       const q = identifier.trim().toLowerCase();
@@ -149,6 +161,7 @@ export function createMemoryRepo(opts: { seed?: boolean } = { seed: true }): Rep
         mustChangePassword: t.mustChangePassword ?? true,
         status: t.status ?? "active",
         isDemo: t.isDemo ?? false,
+        ...(t.temporaryDemoExpiresAt ? { temporaryDemoExpiresAt: t.temporaryDemoExpiresAt } : {}),
         firstLoginAt: null,
         lastLoginAt: null,
         problemId: null,

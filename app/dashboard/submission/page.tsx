@@ -39,6 +39,11 @@ export default async function TeamSubmissionPage() {
       ) : null}
       <section className="panel mt-5 p-7">
         <h2 className="text-2xl font-bold">Final video submission</h2>
+        {current.team.temporaryDemoExpiresAt ? (
+          <p className="mt-5 rounded-xl border border-warning/40 bg-warning/10 p-5 text-sm text-muted-foreground">
+            Video uploads are disabled in the temporary participant demo.
+          </p>
+        ) : null}
         {submission?.status === "submitted" ? (
           <div className="mt-5 rounded-xl border border-success/40 bg-success/10 p-5">
             <h2 className="font-bold text-success">Final video received</h2>
@@ -49,7 +54,7 @@ export default async function TeamSubmissionPage() {
               Your team’s final submission is locked. Contact event staff if you need help.
             </p>
           </div>
-        ) : (
+        ) : current.team.temporaryDemoExpiresAt ? null : (
           <div className="mt-5 rounded-xl border border-warning/40 bg-warning/10 p-5">
             <h2 className="font-bold">One final video, uploaded directly to organizer storage</h2>
             <p className="mt-2 text-sm text-muted-foreground">

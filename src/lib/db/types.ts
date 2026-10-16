@@ -19,6 +19,8 @@ export type Team = {
   submissionStatus: SubmissionStatus;
   challengeViewedAt: string | null;
   isDemo?: boolean;
+  /** Present only on temporary public participant demos; expired records are removed by TTL. */
+  temporaryDemoExpiresAt?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -27,7 +29,7 @@ export type NewTeam = Pick<
   Team,
   "teamCode" | "teamName" | "member1Name" | "member2Name" | "email" | "passwordHash"
 > &
-  Partial<Pick<Team, "mustChangePassword" | "status" | "isDemo">>;
+  Partial<Pick<Team, "mustChangePassword" | "status" | "isDemo" | "temporaryDemoExpiresAt">>;
 
 export type Admin = {
   id: string;
@@ -76,6 +78,7 @@ export type AiDeclaration = {
   rulesConfirmed: boolean;
   originalityConfirmed: boolean;
   createdAt: string;
+  temporaryDemoExpiresAtDate?: Date;
 };
 
 export type AuditLog = {

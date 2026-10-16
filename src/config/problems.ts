@@ -52,7 +52,7 @@ export const PROBLEMS: ProblemStatement[] = [
     summary: "An urban commuter backpack with storage and solar-assisted charging.",
     description:
       "VoltPack is a practical urban backpack for commuters carrying daily essentials and devices away from a power outlet. It has multiple storage compartments, a dedicated laptop compartment, USB charging ports connected to a power bank, and an integrated solar panel that provides supplemental charging. Its distinguishing feature is the combination of organized commuter storage and solar-assisted device charging in one bag.",
-    targetAudience: "Urban commuters and students carrying a laptop and mobile devices.",
+    targetAudience: "Urban commuters and people carrying laptops and mobile devices.",
     sellingProposition:
       "Combines organized everyday carry with supplemental solar charging in one commuter backpack.",
     features: [
@@ -243,17 +243,16 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     summary: "Your morning coffee, served by the harvest.",
     description:
       "Introduce 'HuskBrew', reusable coffee cups made from rice husk — an agricultural by-product usually burned. Durable, BPA-free, dishwasher-safe, and biodegradable at end of life.",
-    targetAudience:
-      "College students and café-goers, 18–35, who care about everyday sustainability.",
+    targetAudience: "Young adults and café-goers, 18–35, who care about everyday sustainability.",
     sellingProposition: "Turns farm waste into your daily ritual — no plastic, no guilt.",
     toolCategories: ["Script & Copy", "Image Generation", "Voice / TTS", "Editing"],
     capacity: 20,
     archived: true,
-    objective: "Build awareness and drive campus café partnerships.",
+    objective: "Build awareness and drive café partnerships.",
     duration: "30–45 seconds",
     constraints: ["Indian context encouraged", "No disparaging competitors"],
     angles: [
-      "The farmer and the student — two worlds, one cup",
+      "The farmer and the café-goer — two worlds, one cup",
       "ASMR coffee pour with husk textures",
       "Before/after: smoke field vs. café table",
     ],
@@ -265,7 +264,7 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     summary: "The bottle that reminds you to stay alive (and kind to Earth).",
     description:
       "Promote 'AquaPulse', a stainless-steel bottle with a glowing hydration reminder cap, UV self-cleaning, and a companion app that tracks plastic bottles saved.",
-    targetAudience: "Students, coders and gym-goers, 16–30, who forget to drink water.",
+    targetAudience: "Active people, coders and gym-goers, 16–30, who forget to drink water.",
     sellingProposition:
       "Hydration made smart — clean water, zero single-use plastic, gentle nudges.",
     toolCategories: ["Image Generation", "Video Generation", "Voice / TTS", "Music / Sound"],
@@ -291,8 +290,7 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     summary: "Bring the sun home after dark.",
     description:
       "Introduce 'Ujala', a portable solar lantern designed for dependable light during power cuts, outdoor evenings and study sessions. It charges in daylight, has a USB backup port and is built for years of repairable use.",
-    targetAudience:
-      "Students, families and outdoor explorers who value reliable, lower-impact lighting.",
+    targetAudience: "Families and outdoor explorers who value reliable, lower-impact lighting.",
     sellingProposition:
       "One sunny day of charging, many brighter nights without disposable batteries.",
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Music / Sound"],
@@ -317,9 +315,8 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     title: "Millet Energy Bites",
     summary: "A little grain. A lot of get-up-and-go.",
     description:
-      "Launch 'MileStart', a portable snack made with locally sourced millets, dates and seeds. It is designed for a quick break between lectures, practice and the commute home.",
-    targetAudience:
-      "Busy college students and young professionals looking for convenient snack options.",
+      "Launch 'MileStart', a portable snack made with locally sourced millets, dates and seeds. It is designed for a quick break between activities and the commute home.",
+    targetAudience: "Busy people and young professionals looking for convenient snack options.",
     sellingProposition: "A satisfying, on-the-go bite rooted in familiar ingredients.",
     toolCategories: ["Script & Copy", "Image Generation", "Voice / TTS", "Music / Sound"],
     capacity: 20,
@@ -334,7 +331,7 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     angles: [
       "A fast-paced day pauses for one small reset",
       "A modern remix of a family snack ritual",
-      "Millet grains become the beat of a campus day",
+      "Millet grains become the beat of a busy day",
     ],
   },
   {
@@ -369,8 +366,7 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     summary: "Carry your day. Leave less behind.",
     description:
       "Introduce 'LoopPack', a durable everyday backpack made from recycled textile fibres, with repairable straps, thoughtful compartments and a simple take-back programme.",
-    targetAudience:
-      "Students and commuters who need a dependable bag for class, work and weekends.",
+    targetAudience: "Commuters who need a dependable bag for work and weekends.",
     sellingProposition: "Useful design, repairable details and a second life for recovered fabric.",
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Editing"],
     capacity: 20,
@@ -383,9 +379,9 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
       "Include a clear product name and call to action",
     ],
     angles: [
-      "One backpack follows its owner from class to a weekend trip",
+      "One backpack follows its owner from work to a weekend trip",
       "A frayed strap gets repaired instead of replaced",
-      "Recovered fabric becomes a new campus essential",
+      "Recovered fabric becomes a new everyday essential",
     ],
   },
   {
@@ -395,7 +391,7 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
     summary: "Laundry day, minus the bulky bottle.",
     description:
       "Launch 'WashFold', pre-measured laundry detergent sheets in recyclable paper packaging. Each lightweight sheet dissolves in the wash, making storage and travel simpler.",
-    targetAudience: "Students in hostels, frequent travellers and small households.",
+    targetAudience: "People in shared housing, frequent travellers and small households.",
     sellingProposition: "A compact, pre-measured laundry routine with less packaging bulk.",
     toolCategories: ["Script & Copy", "Image Generation", "Video Generation", "Music / Sound"],
     capacity: 20,
@@ -408,7 +404,7 @@ export const LEGACY_PROBLEMS: ProblemStatement[] = [
       "Avoid presenting the sheets as edible or child-safe",
     ],
     angles: [
-      "A hostel shelf makeover",
+      "A shared-home shelf makeover",
       "Pack a whole laundry routine into a travel bag",
       "One sheet dissolves into a quick visual transition",
     ],

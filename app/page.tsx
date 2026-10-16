@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Clock3, MapPin, Sparkles, UsersRound } from "lucide-react";
+import { CalendarDays, Clock3, Sparkles, UsersRound } from "lucide-react";
 import { CRITERIA, EVENT, STEPS, TIMELINE } from "@/config/event";
 import { SiteHeader } from "./_components/site-header";
 
@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:grid-cols-2 md:items-center md:py-24">
           <div className="animate-rise">
             <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-              {EVENT.umbrella} · {EVENT.department}
+              ADventure · Open creative challenge
             </p>
             <h1 className="mt-4 text-5xl font-black md:text-7xl">
               <span className="text-gradient">AD</span>venture
@@ -26,10 +26,6 @@ export default function HomePage() {
               <li className="flex items-center gap-2">
                 <Clock3 aria-hidden="true" className="h-4 w-4 text-primary" />
                 {EVENT.timeLabel}
-              </li>
-              <li className="flex items-center gap-2">
-                <MapPin aria-hidden="true" className="h-4 w-4 text-primary" />
-                {EVENT.venue}
               </li>
               <li className="flex items-center gap-2">
                 <UsersRound aria-hidden="true" className="h-4 w-4 text-primary" />
@@ -53,6 +49,12 @@ export default function HomePage() {
                 href="/rules"
               >
                 Explore the rules
+              </Link>
+              <Link
+                className="rounded-full border border-border px-6 py-3 font-semibold transition-colors hover:bg-muted"
+                href="/demo"
+              >
+                Try a demo
               </Link>
             </div>
           </div>
@@ -102,7 +104,7 @@ export default function HomePage() {
       </section>
 
       <footer className="border-t border-border px-6 py-10 text-center text-sm text-muted-foreground">
-        {EVENT.organizer} · {EVENT.department} · {EVENT.umbrella} {EVENT.year}
+        ADventure {EVENT.year} · A product-to-advertising challenge
       </footer>
     </main>
   );

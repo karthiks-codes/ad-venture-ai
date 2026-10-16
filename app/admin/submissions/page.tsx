@@ -33,7 +33,7 @@ export default async function AdminSubmissionsPage() {
                 "Submitted",
                 "Status",
                 "AI declaration",
-                "Drive",
+                "Files",
                 ...(admin.role === "owner" ? ["Override"] : []),
               ].map((heading) => (
                 <th className="px-4 py-3" key={heading}>
@@ -63,18 +63,30 @@ export default async function AdminSubmissionsPage() {
                   <td className="px-4 py-3">{submission.status}</td>
                   <td className="px-4 py-3">{declarations[index] ? "Complete" : "Missing"}</td>
                   <td className="px-4 py-3">
-                    {submission.driveWebViewLink ? (
-                      <a
-                        className="text-primary underline"
-                        href={submission.driveWebViewLink}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        Open file
-                      </a>
-                    ) : (
-                      "—"
-                    )}
+                    <div className="flex flex-col items-start gap-2">
+                      {submission.driveWebViewLink ? (
+                        <a
+                          className="text-primary underline"
+                          href={submission.driveWebViewLink}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Open video
+                        </a>
+                      ) : (
+                        <span>Video unavailable</span>
+                      )}
+                      {submission.status === "submitted" && (
+                        <a
+                          className="text-primary underline"
+                          href={`/api/admin/submissions/${encodeURIComponent(submission.teamId)}/report`}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Open PDF report
+                        </a>
+                      )}
+                    </div>
                   </td>
                   {admin.role === "owner" && (
                     <td className="px-4 py-3">

@@ -46,7 +46,7 @@ export async function POST() {
       );
     }
 
-    if (assigned) {
+    if (assigned && !current.team.temporaryDemoExpiresAt) {
       await repo.log({
         actor: `team:${current.team.teamCode}`,
         action: "problem.draw",

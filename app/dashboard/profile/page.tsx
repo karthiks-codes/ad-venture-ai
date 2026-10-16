@@ -43,12 +43,23 @@ export default async function TeamProfilePage() {
             </dt>
             <dd className="mt-1 font-semibold">{team.member2Name}</dd>
           </div>
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Team email
-            </dt>
-            <dd className="mt-1 font-semibold">{team.email}</dd>
-          </div>
+          {team.temporaryDemoExpiresAt ? (
+            <div>
+              <dt className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Demo access expires
+              </dt>
+              <dd className="mt-1 font-semibold">
+                {new Date(team.temporaryDemoExpiresAt).toISOString()}
+              </dd>
+            </div>
+          ) : (
+            <div>
+              <dt className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Team email
+              </dt>
+              <dd className="mt-1 font-semibold">{team.email}</dd>
+            </div>
+          )}
         </dl>
       </section>
     </main>

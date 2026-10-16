@@ -183,6 +183,16 @@ export const templates = {
       "<p>If an active ADventure team account uses this email, a reset link will be sent separately. If you did not request a reset, you can ignore this message.</p>",
     ),
   }),
+  publicDemoAccess: (p: { loginUrl: string }): Omit<Mail, "to"> => ({
+    subject: "Your ADventure participant demo sign-in link",
+    text: `Open your participant demo using this one-time link: ${p.loginUrl}\n\nThe link and demo access expire two hours after your request. The demo is isolated from participant accounts, and video uploads are disabled. If you did not request this, ignore this email.`,
+    html: `<!doctype html><html><body style="margin:0;background:#0b1024;font-family:Arial,sans-serif;color:#eef2ff"><div style="max-width:560px;margin:0 auto;padding:32px 24px"><div style="font-size:22px;font-weight:800;letter-spacing:-.5px;color:#5ee0ff">ADventure</div><h1 style="font-size:20px;margin:24px 0 16px">Your participant demo is ready</h1><p>Use this one-time link to open the participant workspace:</p><p><a href="${escapeHtml(p.loginUrl)}" style="display:inline-block;padding:12px 18px;background:#5ee0ff;color:#06101d;border-radius:8px;font-weight:bold;text-decoration:none">Open participant demo</a></p><p>The link and demo access expire two hours after your request. The demo is isolated from participant accounts, and video uploads are disabled.</p><p style="color:#94a3b8;font-size:12px;margin-top:32px">If you did not request this, you can ignore this email.</p></div></body></html>`,
+  }),
+  adminDemoRequest: (p: { name: string; email: string; message: string }): Omit<Mail, "to"> => ({
+    subject: "ADventure admin demo request",
+    text: `A visitor requested an admin demo.\n\nName: ${p.name}\nEmail: ${p.email}\nWhat they want to see: ${p.message}\n\nThis request does not grant admin access. Reply directly if you want to arrange a walkthrough.`,
+    html: `<!doctype html><html><body style="margin:0;background:#0b1024;font-family:Arial,sans-serif;color:#eef2ff"><div style="max-width:560px;margin:0 auto;padding:32px 24px"><div style="font-size:22px;font-weight:800;letter-spacing:-.5px;color:#5ee0ff">ADventure</div><h1 style="font-size:20px;margin:24px 0 16px">Admin demo request</h1><p><b>Name:</b> ${escapeHtml(p.name)}</p><p><b>Email:</b> ${escapeHtml(p.email)}</p><p><b>What they want to see:</b><br>${escapeHtml(p.message)}</p><p>This request does not grant admin access. Reply directly if you want to arrange a walkthrough.</p></div></body></html>`,
+  }),
   submitted: (p: { teamName: string; fileName: string; at: string }): Omit<Mail, "to"> => ({
     subject: "ADventure 2026 — submission received",
     text: `Hello ${p.teamName}, we received "${p.fileName}" at ${p.at}. The jury will review submissions later; winners and prize distribution will be announced after judging.`,

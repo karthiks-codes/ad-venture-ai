@@ -247,3 +247,13 @@ export async function getFileMeta(fileId: string) {
     videoMediaMetadata?: { durationMillis?: string; width?: number; height?: number };
   };
 }
+
+/** Downloads a Drive file through the server's configured OAuth credentials. */
+export async function downloadDriveFile(fileId: string): Promise<Uint8Array> {
+  const response = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${q(fileId)}?alt=media&supportsAllDrives=true`,
+    { headers: { Authorization: `Bearer ${await accessToken()}` }, cache: "no-store" },
+  );
+  if (!response.ok) throw new Error(`Drive file download failed [${response.status}].`);
+  return new Uint8Array(await response.arrayBuffer());
+}

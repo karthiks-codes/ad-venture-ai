@@ -35,6 +35,12 @@ export async function POST(request: Request) {
   try {
     const current = await getCurrentTeam();
     if (!current) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
+    if (current.team.temporaryDemoExpiresAt) {
+      return NextResponse.json(
+        { error: "Video uploads are disabled in the temporary participant demo." },
+        { status: 403 },
+      );
+    }
     const repo = getRepo();
     const [submission, settings, declaration] = await Promise.all([
       repo.getSubmission(current.team.id),

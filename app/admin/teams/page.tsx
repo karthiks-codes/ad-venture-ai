@@ -25,6 +25,7 @@ export default async function AdminTeamsPage({
     submission?: string;
     problem?: string;
     login?: string;
+    filtersApplied?: string;
     sort?: string;
     order?: string;
   }>;
@@ -37,6 +38,7 @@ export default async function AdminTeamsPage({
     submission = "",
     problem = "",
     login = "",
+    filtersApplied = "",
     sort: requestedSort = "teamCode",
     order = "asc",
   } = await searchParams;
@@ -46,6 +48,7 @@ export default async function AdminTeamsPage({
   const descending = order === "desc";
   const filtered = teams
     .filter((team) => {
+      if (filtersApplied !== "1") return true;
       const matchesQuery =
         !query ||
         [team.teamCode, team.teamName, team.email, team.member1Name, team.member2Name].some(
@@ -96,10 +99,16 @@ export default async function AdminTeamsPage({
       <h1 className="text-3xl font-bold">Teams</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         {filtered.length} of {teams.length} teams
+        {filtered.length < teams.length && (
+          <a className="ml-3 font-semibold text-primary underline" href="/admin/teams">
+            Show all {teams.length} teams
+          </a>
+        )}
       </p>
       <CreateTeamForm readOnly={admin.role === "viewer"} />
       <ImportTeamsForm readOnly={admin.role === "viewer"} />
       <form className="panel mt-5 grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4" method="get">
+        <input name="filtersApplied" type="hidden" value="1" />
         <label className="text-xs font-semibold text-muted-foreground sm:col-span-2">
           Search teams
           <input
@@ -157,33 +166,35 @@ export default async function AdminTeamsPage({
             <option value="not-completed">Not completed</option>
           </select>
         </label>
-        <label className="text-xs font-semibold text-muted-foreground">
-          Sort by
-          <select
-            className="mt-1 block w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground"
-            defaultValue={sort}
-            name="sort"
-          >
-            <option value="teamCode">Team code</option>
-            <option value="teamName">Team name</option>
-            <option value="status">Team status</option>
-            <option value="login">First login</option>
-            <option value="problem">Problem statement</option>
-            <option value="submission">Submission status</option>
-          </select>
-        </label>
-        <label className="text-xs font-semibold text-muted-foreground">
-          Order
-          <select
-            className="mt-1 block w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground"
-            defaultValue={order === "desc" ? "desc" : "asc"}
-            name="order"
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
-        </label>
-        <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+        <div className="grid grid-cols-2 gap-3 sm:col-span-2 lg:col-span-4">
+          <label className="text-xs font-semibold text-muted-foreground">
+            Sort by
+            <select
+              className="mt-1 block w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground"
+              defaultValue={sort}
+              name="sort"
+            >
+              <option value="teamCode">Team code</option>
+              <option value="teamName">Team name</option>
+              <option value="status">Team status</option>
+              <option value="login">First login</option>
+              <option value="problem">Problem statement</option>
+              <option value="submission">Submission status</option>
+            </select>
+          </label>
+          <label className="text-xs font-semibold text-muted-foreground">
+            Order
+            <select
+              className="mt-1 block w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground"
+              defaultValue={order === "desc" ? "desc" : "asc"}
+              name="order"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </label>
+        </div>
+        <div className="flex items-end gap-2 pt-1 sm:col-span-2 lg:col-span-4">
           <button className="border border-border px-5 py-2 font-semibold" type="submit">
             Apply filters
           </button>
@@ -195,6 +206,14 @@ export default async function AdminTeamsPage({
           </a>
         </div>
       </form>
+      <div className="mt-4 flex justify-end">
+        <a
+          className="inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+          href="/api/admin/teams/export"
+        >
+          Download all teams (Excel)
+        </a>
+      </div>
       <div className="panel mt-5 overflow-x-auto">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
@@ -266,7 +285,11 @@ export default async function AdminTeamsPage({
             {!filtered.length && (
               <tr>
                 <td className="px-4 py-8 text-center text-muted-foreground" colSpan={7}>
-                  No matching teams.
+                  No teams match these filters.{" "}
+                  <a className="text-primary underline" href="/admin/teams">
+                    Clear filters
+                  </a>{" "}
+                  to show all teams.
                 </td>
               </tr>
             )}

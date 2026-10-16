@@ -9,6 +9,8 @@ export async function getCurrentTeam(options: { allowPasswordChange?: boolean } 
   const team = await getRepo().getTeam(session.teamId);
   if (!team || team.status !== "active" || (team.authVersion ?? 0) !== session.authVersion)
     return null;
+  if (team.temporaryDemoExpiresAt && Date.parse(team.temporaryDemoExpiresAt) <= Date.now())
+    return null;
   if (team.mustChangePassword && !options.allowPasswordChange)
     return { team, mustChangePassword: true };
   return { team, mustChangePassword: false };

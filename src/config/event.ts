@@ -3,12 +3,12 @@ export const EVENT = {
   name: "ADventure",
   year: 2026,
   tagline: "One Product. Endless Possibilities.",
-  organizer: "BVRIT Hyderabad College of Engineering for Women",
-  department: "Department of CSE (AI & ML)",
-  umbrella: "Innovation Day",
-  dateLabel: "13 October 2026 · Tuesday",
-  timeLabel: "1:30 PM – 4:00 PM IST",
-  venue: "PB-G2, G3",
+  organizer: "ADventure",
+  department: "Open creative challenge",
+  umbrella: "Open creative challenge",
+  dateLabel: "Open year-round",
+  timeLabel: "Participant demo available anytime",
+  venue: "Online",
   teamSize: 2,
 } as const;
 

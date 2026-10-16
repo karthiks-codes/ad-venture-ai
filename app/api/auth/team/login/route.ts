@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const team = await repo.findTeamByLogin(identifier);
     const valid =
       team &&
+      !team.temporaryDemoExpiresAt &&
       team.status === "active" &&
       (await verifyPassword(parsed.data.password, team.passwordHash));
     if (!valid || !team) {

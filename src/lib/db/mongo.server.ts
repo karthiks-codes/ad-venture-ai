@@ -66,6 +66,7 @@ export async function ensureIndexes(db: Db) {
         { key: { problemId: 1 } },
         { key: { submissionStatus: 1 } },
         { key: { status: 1 } },
+        { key: { temporaryDemoExpiresAtDate: 1 }, expireAfterSeconds: 0 },
       ]),
     db.collection("admins").createIndexes([
       { key: { email: 1 }, unique: true, name: "admin_email_unique" },
@@ -78,11 +79,18 @@ export async function ensureIndexes(db: Db) {
     ]),
     db
       .collection("teamAssignments")
-      .createIndexes([{ key: { teamId: 1 }, unique: true }, { key: { problemId: 1 } }]),
+      .createIndexes([
+        { key: { teamId: 1 }, unique: true },
+        { key: { problemId: 1 } },
+        { key: { temporaryDemoExpiresAtDate: 1 }, expireAfterSeconds: 0 },
+      ]),
     db
       .collection("submissions")
       .createIndexes([{ key: { teamId: 1 }, unique: true }, { key: { status: 1 } }]),
-    db.collection("aiDeclarations").createIndexes([{ key: { teamId: 1 }, unique: true }]),
+    db.collection("aiDeclarations").createIndexes([
+      { key: { teamId: 1 }, unique: true },
+      { key: { temporaryDemoExpiresAtDate: 1 }, expireAfterSeconds: 0 },
+    ]),
     db.collection("aiTools").createIndexes([{ key: { order: 1 } }, { key: { enabled: 1 } }]),
     db
       .collection("auditLogs")
@@ -132,7 +140,7 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
     },
 
     async listTeams() {
-      return (await (await teams()).find().sort({ teamCode: 1 }).toArray()).map((d) =>
+      return (await (await teams()).find({}).sort({ teamCode: 1 }).toArray()).map((d) =>
         strip<Team>(d)!,
       );
     },
@@ -168,6 +176,12 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
         submissionStatus: "none",
         challengeViewedAt: null,
         isDemo: t.isDemo ?? false,
+        ...(t.temporaryDemoExpiresAt
+          ? {
+              temporaryDemoExpiresAt: t.temporaryDemoExpiresAt,
+              temporaryDemoExpiresAtDate: new Date(t.temporaryDemoExpiresAt),
+            }
+          : {}),
         createdAt: ts,
         updatedAt: ts,
       };
@@ -197,7 +211,12 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
         await teams()
       )
         .aggregate<{ _id: string; n: number }>([
-          { $match: { problemId: { $ne: null } } },
+          {
+            $match: {
+              problemId: { $ne: null },
+              temporaryDemoExpiresAtDate: { $exists: false },
+            },
+          },
           { $group: { _id: "$problemId", n: { $sum: 1 } } },
         ])
         .toArray();
@@ -225,7 +244,12 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
           const countRows = await teamCollection
             .aggregate<{ _id: string; n: number }>(
               [
-                { $match: { problemId: { $ne: null } } },
+                {
+                  $match: {
+                    problemId: { $ne: null },
+                    temporaryDemoExpiresAtDate: { $exists: false },
+                  },
+                },
                 { $group: { _id: "$problemId", n: { $sum: 1 } } },
               ],
               { session },
@@ -254,7 +278,15 @@ export function createMongoRepo(getDb: () => Promise<Db>): Repo {
           await db.collection("teamAssignments").updateOne(
             { teamId },
             {
-              $set: { teamId, problemId, assignedAt, assignedBy: by },
+              $set: {
+                teamId,
+                problemId,
+                assignedAt,
+                assignedBy: by,
+                ...(current.temporaryDemoExpiresAt
+                  ? { temporaryDemoExpiresAtDate: new Date(current.temporaryDemoExpiresAt) }
+                  : {}),
+              },
               $setOnInsert: { _id: crypto.randomUUID() },
             },
             { upsert: true, session },

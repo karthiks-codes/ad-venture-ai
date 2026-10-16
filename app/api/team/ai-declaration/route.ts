@@ -60,8 +60,16 @@ export async function POST(request: Request) {
       teamId: current.team.id,
       ...parsed.data,
       createdAt: new Date().toISOString(),
+      ...(current.team.temporaryDemoExpiresAt
+        ? { temporaryDemoExpiresAtDate: new Date(current.team.temporaryDemoExpiresAt) }
+        : {}),
     });
-    await repo.log({ actor: `team:${current.team.teamCode}`, action: "team.ai_declaration_saved" });
+    if (!current.team.temporaryDemoExpiresAt) {
+      await repo.log({
+        actor: `team:${current.team.teamCode}`,
+        action: "team.ai_declaration_saved",
+      });
+    }
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("[ai-declaration] Save failed", error instanceof Error ? error.name : "unknown");
